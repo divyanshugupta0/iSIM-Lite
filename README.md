@@ -46,7 +46,7 @@ The official portal gets the job done, but it can be slow and hard to read on mo
 3. **Run the server:**
    ```bash
    npm start
-   # or
+   # or 
    node server.js
    ```
 
