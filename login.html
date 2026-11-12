@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLBAJAJ Student Dashboard</title>
+    <link rel="icon" href="https://www.glbitm.org/images/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca;
+            --bg-color: #f1f5f9; --card-bg: #ffffff;
+            --text-dark: #0f172a; --text-muted: #64748b;
+            --border-radius: 16px; --input-radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg-color); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column;}
+        
+        .page-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .page-overlay.active { opacity: 1; pointer-events: all; }
+        .spinner { width: 52px; height: 52px; border: 5px solid rgba(79, 70, 229, 0.15); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loader-text { margin-top: 18px; font-weight: 700; font-size: 16px; color: var(--primary); letter-spacing: 0.5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .hidden { display: none !important; }
+        svg { width: 22px; height: 22px; flex-shrink: 0; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+
+        #login-view { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #f0f9ff, #e0e7ff); position: absolute; top:0; z-index: 100; transition: 0.4s; padding: 20px;}
+        .login-card { background: var(--card-bg); padding: 40px; border-radius: var(--border-radius); box-shadow: 0 15px 50px rgba(0,0,0,0.08); width: 100%; max-width: 420px; text-align: center; }
+        .login-card img.logo-img { width: 80px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .login-card h2 { font-size: 28px; font-weight: 800; margin-bottom: 5px; color: #1e293b;}
+        
+        .input-wrapper { position: relative; margin-bottom: 18px; }
+        .input-wrapper svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; transition: 0.3s;}
+        .input-wrapper input { width: 100%; padding: 15px 15px 15px 48px; border: 2px solid #e2e8f0; border-radius: var(--input-radius); outline: none; font-size: 15px; background: #f8fafc; transition: 0.3s; }
+        .input-wrapper input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 4px rgba(79,70,229,0.1); }
+        .input-wrapper input:focus + svg { color: var(--primary); }
+        
+        .captcha-box { width: 100%; margin: 0 auto 18px; cursor: pointer !important; border: 2px solid #e2e8f0; border-radius: var(--input-radius); padding: 0; background: #f8fafc; overflow: hidden; display: flex; justify-content: center; align-items: center; transition: 0.3s; aspect-ratio: 3.5 / 1; height: auto; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
+        .captcha-box:hover { border-color: var(--primary); }
+        .captcha-box img { width: 100%; height: 100%; object-fit: contain; display: none; border-radius: calc(var(--input-radius) - 2px); cursor: pointer !important; }
+        .captcha-state { width:100%; min-height:76px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; padding:10px; color:var(--text-muted); text-align:center; font-size:13px; font-weight:700; cursor:pointer !important; }
+        .captcha-loader { width:25px; height:25px; border:3px solid rgba(79,70,229,.16); border-top-color:var(--primary); border-radius:50%; animation:spin .75s linear infinite; }
+        .captcha-state.error { color:#b91c1c; }
+        .captcha-reload { border:0; background:transparent; color:var(--primary); font:inherit; font-weight:800; text-decoration:underline; cursor:pointer; padding:2px 4px; }
+        .captcha-box.ready { cursor:pointer !important; }
+        .captcha-box:active { border-color:var(--primary); background:#eef2ff; }
+        .captcha-box:focus-visible { outline:3px solid rgba(79,70,229,.25); outline-offset:3px; }
+        
+        .btn-modern { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: var(--input-radius); font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+        .btn-modern:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4); }
+        
+        .login-error { display:none; margin: 0 0 16px; padding: 12px 16px; border: 1px solid #fecaca; border-radius: 10px; background: #fff1f2; color: #b91c1c; text-align: center; font-size: 14px; font-weight: 600; line-height: 1.5; }
+        .login-error.show { display:block; animation: errorIn .3s ease-out; }
+        @keyframes errorIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+        .top-nav { background: var(--card-bg); box-shadow: 0 2px 15px rgba(0,0,0,0.04); padding: 0 24px; display: flex; justify-content: space-between; align-items: center; height: 76px; position: sticky; top: 0; z-index: 50; border-bottom: 1px solid #f1f5f9; }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 22px; letter-spacing: 0.5px; color: #1e293b; white-space: nowrap; }
+        .brand span { font-weight: 800; background: linear-gradient(100deg, #1e293b, #4f46e5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .brand img { width: 42px; height: 42px; object-fit: contain; border-radius: 10px; padding: 2px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .nav-tabs { display: flex; gap: 8px; height: 100%; align-items: center; }
+        .nav-tab { background: transparent; border: none; font-size: 15px; font-weight: 700; color: var(--text-muted); cursor: pointer; padding: 12px 18px; border-radius: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; height: auto; }
+        .nav-tab.active { color: var(--primary); background: #e0e7ff; }
+        .nav-tab:hover:not(.active) { color: var(--primary); }
+        
+        .top-nav-right { display: flex; align-items: center; gap: 12px; height: 100%; }
+        .top-profile-badge { display: flex; align-items: center; gap: 10px; padding: 5px 14px 5px 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 100px; cursor: pointer; transition: 0.2s; height: 44px; }
+        .top-profile-badge:hover { border-color: var(--primary); background: #f1f5f9; }
+        .top-profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e0e7ff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .top-profile-avatar svg { width: 18px; height: 18px; color: var(--primary); }
+        .top-profile-info { display: flex; flex-direction: column; text-align: left; justify-content: center;}
+        .top-profile-name { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.2; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .top-profile-adm { font-size: 11px; font-weight: 600; color: var(--text-muted); line-height: 1.2; }
+
+        .mini-spinner { width: 18px; height: 18px; border: 2.5px solid rgba(79, 70, 229, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        
+        .skeleton-text { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 4px; color: transparent !important; display: inline-block; user-select: none; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .logout-btn { background: #fee2e2; color: #ef4444; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 14px; height: 44px; }
+        .logout-btn:hover { background: #fecaca; }
+
+        #dashboard-view { flex: 1; display: flex; flex-direction: column; }
+        .main-container { max-width: 1140px; width: 100%; margin: 0 auto; padding: 30px 20px; flex: 1; }
+        .card { background: var(--card-bg); padding: 32px; border-radius: var(--border-radius); box-shadow: 0 4px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; margin-bottom: 24px;}
+        
+        .att-tabs { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; align-items: center; }
+        .att-btn { padding: 12px 22px; border: 2px solid #e2e8f0; background: transparent; border-radius: 100px; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: 0.3s; font-size: 14px; white-space: nowrap; text-align: center; }
+        .att-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+        .att-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+        
+        .today-summary-bar { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 20px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .summary-bar-track { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #e2e8f0; gap: 2px; }
+        .summary-segment { height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .seg-present { background: #22c55e; }
+        .seg-absent { background: #ef4444; }
+        .seg-nm { background: #eab308; }
+        .summary-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; font-weight: 700; justify-content: center; align-items: center;}
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.01); }
+        .data-table { width: 100%; border-collapse: collapse; text-align: center; table-layout:fixed; }
+        .data-table th, .data-table td { padding: 16px 16px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; text-align: center; }
+        .data-table th { background: #f8fafc; color: var(--text-muted); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .data-table td { font-size: 15px; font-weight: 500; color: #1e293b;}
+        .data-table tbody tr { transition: 0.2s; }
+        .data-table tbody tr:hover { background-color: #f8fafc; }
+        
+        .subject-cell { display:flex; flex-direction:column; align-items:center; gap:3px; max-width:100%; width:100%; min-width:0; text-align: center; }
+        .today-subject-title { font-weight:800; color:var(--text-dark); line-height:1.25; white-space:normal; overflow-wrap:anywhere; text-align: center; }
+        .today-subject-meta { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; color:var(--text-muted); font-size:11px; font-weight:700; line-height:1.25; }
+        
+        .global-tooltip { position: fixed; background: #1e293b; color: #ffffff; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 99999; white-space: normal; max-width: 300px; box-shadow: 0 8px 25px rgba(0,0,0,0.25); pointer-events: none; word-wrap: break-word; line-height: 1.5; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; }
+        .global-tooltip.show { opacity: 1; visibility: visible; }
+
+        .gauge-table thead { display:none; }
+        .gauge-table tbody tr:hover { background:transparent; }
+        .gauge-table tbody td { padding:18px 12px; }
+        .attendance-gauge-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:22px 14px; align-items:start; justify-items:center; width:100%; }
+        .attendance-gauge-card { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:8px; width:100%; min-width:0; text-align:center; }
+        .attendance-gauge { width:104px; height:104px; position:relative; flex:0 0 auto; }
+        .attendance-gauge svg { width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
+        .gauge-track { fill:none; stroke:#e8edf5; stroke-width:9; }
+        .gauge-value-ring { fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .attendance-gauge-value { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-dark); font-size:20px; font-weight:800; letter-spacing:-.5px; font-variant-numeric:tabular-nums; }
+        .attendance-gauge-label { max-width:150px; width:100%; color:var(--text-dark); font-size:13px; font-weight:700; line-height:1.3; overflow-wrap:anywhere; text-align:center; }
+        
+        .badge { padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; display: inline-block; text-align: center; min-width: 45px; letter-spacing: 0.3px;}
+        .badge-present { background: #dcfce7; color: #16a34a; }
+        .badge-absent { background: #fee2e2; color: #ef4444; }
+        .badge-nm { background: #fef08a; color: #ca8a04; }
+        .badge-default { background: #f1f5f9; color: #64748b; }
+        .status-badge { border:0; cursor:help; font:inherit; touch-action:manipulation; }
+        .subject-type { color:var(--text-muted); font-size:11px; font-weight:800; white-space:nowrap; }
+
+        .filter-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; align-items: center; justify-content: center; background: #f8fafc; padding: 18px 24px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .date-input-group { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; transition: 0.3s; }
+        .date-input-group:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+        .date-input-group input { border: none; outline: none; padding: 0; font-family: 'Outfit'; font-size: 15px; color: var(--text-dark); background: transparent; font-weight: 500;}
+        .btn-small { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .btn-small:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+        .profile-header { display: flex; gap: 25px; align-items: center; margin-bottom: 30px; padding-bottom: 25px; border-bottom: 2px solid #f1f5f9; }
+        .profile-avatar-wrapper { width: 110px; height: 110px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden; cursor: pointer; position: relative; }
+        .profile-avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-avatar-wrapper svg { width: 55px; height: 55px; color: var(--primary); }
+        .profile-header h2 { font-size: 30px; font-weight: 800; margin-bottom: 6px; color: #0f172a; }
+        .profile-header p { color: var(--primary); font-weight: 700; font-size: 16px; background: #e0e7ff; padding: 6px 14px; border-radius: 20px; display: inline-block; }
+
+        .profile-section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin: 30px 0 15px 0; display: flex; align-items: center; gap: 10px;}
+        .profile-section-title svg { color: var(--primary); }
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .prof-item { background: #f8fafc; padding: 18px 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: 0.2s;}
+        .prof-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-color: #cbd5e1; transform: translateY(-1px); }
+        .prof-label { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        .prof-val { font-size: 16px; font-weight: 600; margin-top: 6px; color: #0f172a; word-break: break-word;}
+
+        .lightbox-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 10000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .lightbox-modal.active { opacity: 1; pointer-events: all; }
+        .lightbox-content { max-width: 90vw; max-height: 80vh; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); object-fit: contain; }
+        .lightbox-close { position: absolute; top: 25px; right: 25px; background: rgba(255,255,255,0.2); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .session-expired-state { text-align:center; padding: 60px 20px; }
+        .session-expired-state h3 { font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 12px; }
+        .session-expired-state p { color: var(--text-muted); font-size: 15px; font-weight: 500; margin-bottom: 24px; }
+        
+        @media (max-width: 768px) {
+            .hide-mobile { display: none !important; }
+            .top-nav { height: 68px; padding: 0 12px; align-items: center; }
+            .nav-tabs { gap: 6px; align-items: center; }
+            .nav-tab { padding: 8px 10px; font-size: 13px; align-items: center; }
+            .nav-tab svg { width: 18px; height: 18px; }
+            .top-nav-right { gap: 6px; align-items: center; }
+            .top-profile-badge { padding: 0; width: 44px; justify-content: center; }
+            .top-profile-info { display: none; }
+            .logout-btn { padding: 8px 10px; }
+            .logout-btn span { display: none; }
+            .main-container { padding: 16px 12px; }
+            .card { padding: 18px; }
+            .att-tabs { justify-content: center; gap: 8px; }
+            .att-btn { padding: 9px 14px; font-size: 13px; }
+            .profile-header { flex-direction: column; text-align: center; gap: 15px; }
+            .filter-row { justify-content: center; }
+            .data-table th, .data-table td { padding:9px 6px; }
+            .data-table th { font-size:10px; letter-spacing:0; }
+            .data-table td { font-size:10px; overflow-wrap:anywhere; }
+            .today-table th:nth-child(1), .today-table td:nth-child(1) { width:38%; }
+            .today-table th:nth-child(2), .today-table td:nth-child(2) { width:22%; }
+            .today-table th:nth-child(3), .today-table td:nth-child(3) { width:24%; }
+            .today-table th:nth-child(4), .today-table td:nth-child(4) { width:16%; text-align:center; }
+            .today-table .today-subject-meta { font-size:10px; }
+            .attendance-gauge-grid { grid-template-columns:repeat(auto-fit,minmax(105px,1fr)); gap:18px 8px; }
+            .attendance-gauge { width:94px; height:94px; }
+            .attendance-gauge-value { font-size:18px; }
+            .attendance-gauge-label { font-size:12px; max-width:125px; }
+            .gauge-table tbody td { padding:16px 8px; }
+            .badge { min-width:0; padding:5px 7px; font-size:11px; }
+            .summary-legend { gap:8px; font-size:11px; }
+            .filter-row { padding:12px; gap:8px; }
+            .date-input-group { width:100%; justify-content:space-between; }
+            .date-input-group input { max-width:65%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="globalTooltip" class="global-tooltip"></div>
+
+    <div class="page-overlay" id="pageOverlay">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loaderText">Loading...</div>
+    </div>
+
+    <div class="lightbox-modal" id="imageLightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Enlarged Photo">
+    </div>
+
+    <div id="login-view">
+        <div class="login-card">
+            <img src="https://www.glbitm.org/Uploads/image/846imguf_LogoGLBajaj.jpg" class="logo-img" alt="Logo">
+            <h2>Student Portal</h2>
+            <p id="statusMsg" style="margin-bottom:25px; color:var(--text-muted); font-size: 15px; font-weight: 500;">Secure Login to iSIM</p>
+            <div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
+            <form id="loginForm">
+                <div class="input-wrapper">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <input type="text" id="admNumber" placeholder="Admission Number" required>
+                </div>
+                <div class="input-wrapper">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div class="captcha-box" id="captchaBox" role="button" tabindex="0" aria-label="Reload captcha" onclick="reloadCaptcha()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();reloadCaptcha();}">
+                    <div class="captcha-state" id="captchaState" aria-live="polite"><span class="captcha-loader"></span><span>Loading secure captcha…</span></div>
+                    <img id="captchaImg" alt="Captcha">
+                </div>
+                <div class="input-wrapper">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <input type="text" id="captchaText" placeholder="Enter Captcha" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn-modern">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-view" class="hidden">
+        <div class="top-nav">
+            <div class="brand">
+                <img src="https://www.glbitm.org/Uploads/image/846imguf_LogoGLBajaj.jpg" alt="GL Bajaj"> 
+                <span class="hide-mobile">GLBAJAJ</span>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" id="tabBtnAttendance" onclick="switchMainTab('view-attendance', this)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Attendance</span>
+                </button>
+                <button class="nav-tab" id="tabBtnProfile" onclick="switchMainTab('view-profile', this)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Profile</span>
+                </button>
+            </div>
+            <div class="top-nav-right">
+                <div class="top-profile-badge" onclick="switchMainTab('view-profile', document.getElementById('tabBtnProfile'))">
+                    <div class="top-profile-avatar" id="topNavAvatar">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="top-profile-info">
+                        <span class="top-profile-name" id="topNavName">Student</span>
+                        <span class="top-profile-adm" id="topNavAdm">-</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logoutPortal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div id="view-attendance" class="view-section">
+                <div class="card">
+                    <div class="att-tabs">
+                        <button class="att-btn active" onclick="loadAttendance('today', this)">Today's Attendance</button>
+                        <button class="att-btn" onclick="loadAttendance('monthly', this)">Monthly Attendance</button>
+                        <button class="att-btn" onclick="loadAttendance('semester', this)">Semester Analytics</button>
+                        <button class="att-btn" onclick="showDateFilters('subject', this)">Subject Wise</button>
+                    </div>
+
+                    <div id="todaySummaryBox" class="today-summary-bar hidden">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span style="font-weight: 800; font-size: 14px; text-transform: uppercase; color: var(--text-muted);">Today's Attendance Statistics</span>
+                            <span id="todayStatRatio" style="font-weight: 800; font-size: 14px; color: var(--primary);">0/0 Classes Marked</span>
+                        </div>
+                        <div class="summary-bar-track" id="summaryBarTrack"></div>
+                        <div class="summary-legend" id="summaryLegend"></div>
+                    </div>
+
+                    <div id="dateFilters" class="filter-row hidden">
+                        <div class="date-input-group">
+                            <span style="color:var(--text-muted); font-size:13px; font-weight:700;">START</span>
+                            <input type="date" id="dateFrom">
+                        </div>
+                        <div class="date-input-group">
+                            <span style="color:var(--text-muted); font-size:13px; font-weight:700;">END</span>
+                            <input type="date" id="dateTo">
+                        </div>
+                        <button class="btn-small" onclick="applyDateFilter()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Fetch
+                        </button>
+                    </div>
+
+                    <div id="attLoading" class="hidden" style="text-align:center; padding:50px; font-weight: 600; color:var(--primary); display:flex; flex-direction:column; align-items:center; gap:15px; font-size: 16px;">
+                        <div class="spinner"></div> Synchronizing Data...
+                    </div>
+                    
+                    <div id="attTableContainer" class="table-responsive">
+                        <table class="data-table">
+                            <thead id="attThead"></thead>
+                            <tbody id="attTbody"><tr><td style="text-align: center; color: var(--text-muted);">Please wait, loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-profile" class="view-section hidden">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="profile-avatar-wrapper" id="profAvatarWrapper" onclick="openProfileLightbox()">
+                            <svg id="profDefaultSvg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <img id="profImg" class="hidden" src="" alt="Profile" onerror="window.handleImageError(this)">
+                        </div>
+                        <div>
+                            <h2 id="profName">Student Profile</h2>
+                            <p id="profAdm">Fetching Information...</p>
+                        </div>
+                    </div>
+                    <div id="dynamicProfileContainer">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500;">Loading Profile Details...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://glb-backend.onrender.com/api';
+        const SESSION_STORAGE_KEY = 'glb_student_portal_session';
+        const SUBJECT_DATES_STORAGE_KEY = 'glb_subject_attendance_dates_v1';
+        let sessionId = localStorage.getItem(SESSION_STORAGE_KEY) || null;
+        let currentAttType = 'today';
+        let profileLoaded = false;
+        
+        let currentProfilePhoto = null;
+        
+        let attendanceLoaded = false;
+        let attendanceLoadedAt = 0;
+        let attendanceLoadedType = null;
+        let attendanceRequestId = 0;
+        let profileRequestId = 0;
+        let captchaRequestId = 0;
+        let currentView = 'view-attendance';
+
+        const pageOverlay = document.getElementById('pageOverlay');
+        const loaderText = document.getElementById('loaderText');
+        const statusMsg = document.getElementById('statusMsg');
+        const loginError = document.getElementById('loginError');
+        
+        const defaultProfileSvg = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+        function safeImageUrl(value) {
+            try {
+                const url = new URL(value, window.location.href);
+                return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+            } catch (_) { return ''; }
+        }
+
+        window.handleImageError = function(imgElement) {
+            if (imgElement) {
+                imgElement.onerror = null;
+                imgElement.onload = null;
+                imgElement.removeAttribute('src');
+                imgElement.classList.add('hidden');
+            }
+            const fallback = document.getElementById('profDefaultSvg');
+            if (fallback) fallback.classList.remove('hidden');
+            
+            const topAvatar = document.getElementById('topNavAvatar');
+            if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
+            
+            currentProfilePhoto = null;
+        };
+
+        function setCaptchaState(state, message) {
+            const box = document.getElementById('captchaBox');
+            const stateEl = document.getElementById('captchaState');
+            const image = document.getElementById('captchaImg');
+            if (!box || !stateEl || !image) return;
+            box.classList.toggle('ready', state === 'ready');
+            image.style.display = state === 'ready' ? 'block' : 'none';
+            stateEl.classList.toggle('hidden', state === 'ready');
+            stateEl.classList.toggle('error', state === 'error');
+            if (state === 'loading') stateEl.innerHTML = '<span class="captcha-loader"></span><span>Loading secure captcha…</span>';
+            else if (state === 'error') stateEl.innerHTML = `<span>${escapeHtml(message || 'Captcha could not be loaded.')}</span><button class="captcha-reload" type="button" onclick="event.stopPropagation();reloadCaptcha()">Tap to reload captcha</button>`;
+        }
+
+        function reloadCaptcha() {
+            initSession(true);
+        }
+
+        function readSubjectDates() {
+            try {
+                const value = JSON.parse(localStorage.getItem(SUBJECT_DATES_STORAGE_KEY) || 'null');
+                if (value && /^\d{4}-\d{2}-\d{2}$/.test(value.from || '') && /^\d{4}-\d{2}-\d{2}$/.test(value.to || '')) return value;
+            } catch (_) {}
+            return { from: '', to: '' };
+        }
+
+        function saveSubjectDates(from, to) {
+            localStorage.setItem(SUBJECT_DATES_STORAGE_KEY, JSON.stringify({ from, to }));
+        }
+
+        function validDateRange(from, to) {
+            return /^\d{4}-\d{2}-\d{2}$/.test(from || '') && /^\d{4}-\d{2}-\d{2}$/.test(to || '') && from <= to;
+        }
+
+        function showGlobalTooltip(e, text) {
+            const tooltip = document.getElementById('globalTooltip');
+            tooltip.innerText = text;
+            tooltip.classList.add('show');
+            const rect = e.target.getBoundingClientRect();
+            let top = rect.bottom + 8;
+            let left = rect.left;
+            
+            if (left + tooltip.offsetWidth > window.innerWidth - 10) {
+                left = window.innerWidth - tooltip.offsetWidth - 10;
+            }
+            if (top + tooltip.offsetHeight > window.innerHeight - 10) {
+                top = rect.top - tooltip.offsetHeight - 8;
+            }
+            
+            tooltip.style.top = top + 'px';
+            tooltip.style.left = left + 'px';
+        }
+        
+        function hideGlobalTooltip() {
+            document.getElementById('globalTooltip').classList.remove('show');
+        }
+        
+        function tooltipTarget(target) { return target?.closest?.('.status-badge'); }
+        document.addEventListener('mouseover', e => {
+            const target = tooltipTarget(e.target);
+            if (target) showGlobalTooltip({ target }, target.dataset.tooltip || '');
+            else hideGlobalTooltip();
+        });
+        document.addEventListener('focusin', e => {
+            const target = tooltipTarget(e.target);
+            if (target) showGlobalTooltip({ target }, target.dataset.tooltip || '');
+        });
+        document.addEventListener('focusout', e => {
+            if (tooltipTarget(e.target)) hideGlobalTooltip();
+        });
+        document.addEventListener('click', e => {
+            const target = tooltipTarget(e.target);
+            if (target) showGlobalTooltip({ target }, target.dataset.tooltip || '');
+            else hideGlobalTooltip();
+        });
+        let statusHoldTimer = null;
+        document.addEventListener('pointerdown', e => {
+            const target = e.target.closest?.('.status-badge');
+            if (!target) return;
+            statusHoldTimer = setTimeout(() => showGlobalTooltip({ target }, target.dataset.tooltip || ''), 350);
+        });
+        ['pointerup','pointercancel','pointerleave'].forEach(name => document.addEventListener(name, () => {
+            if (statusHoldTimer) clearTimeout(statusHoldTimer);
+            statusHoldTimer = null;
+        }));
+
+        function showSessionExpiredUI(containerElement, isTable = false) {
+            const expiredHTML = `
+                <div class="session-expired-state">
+                    <h3>Session Expired</h3>
+                    <p>Your secure session has ended. Please log in again to continue.</p>
+                    <button class="btn-modern" style="width:auto; padding:12px 28px;" onclick="logoutPortal()">Login Again</button>
+                </div>
+            `;
+            if(isTable) {
+                document.getElementById('attThead').innerHTML = '';
+                containerElement.innerHTML = `<tr><td colspan="4">${expiredHTML}</td></tr>`;
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('todaySummaryBox').classList.add('hidden');
+            } else {
+                containerElement.innerHTML = expiredHTML;
+                pageOverlay.classList.remove('active');
+            }
+        }
+
+        function routeUrl(route) {
+            const routes = { login: '?login', today: '?attendance#today', monthly: '?attendance#monthly', semester: '?attendance#semester', profile: '?profile' };
+            if (route === 'subject') {
+                const from = document.getElementById('dateFrom')?.value || readSubjectDates().from;
+                const to = document.getElementById('dateTo')?.value || readSubjectDates().to;
+                const params = new URLSearchParams({ attendance: '' });
+                if (validDateRange(from, to)) { params.set('from', from); params.set('to', to); }
+                return `?attendance${params.has('from') ? `&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}` : ''}#subject`;
+            }
+            return routes[route] || routes.today;
+        }
+
+        function setPageRoute(route, replace = false) {
+            const next = routeUrl(route);
+            if (`${location.search}${location.hash}` === next) return;
+            const method = replace ? 'replaceState' : 'pushState';
+            history[method]({ route }, '', next);
+        }
+
+        function routeFromUrl() {
+            const queryParams = new URLSearchParams(window.location.search);
+            const hash = location.hash.replace(/^#/, '').toLowerCase();
+            if (queryParams.has('profile')) return 'profile';
+            if (queryParams.has('attendance')) return ['today','monthly','semester','subject'].includes(hash) ? hash : 'today';
+            return 'login';
+        }
+
+        function setLoginError(message) {
+            loginError.textContent = message || 'Login failed. Please check your details and try again.';
+            loginError.classList.add('show');
+            statusMsg.innerText = 'Please correct the error below and try again.';
+            statusMsg.style.color = '#b91c1c';
+        }
+
+        function clearLoginError() {
+            loginError.textContent = '';
+            loginError.classList.remove('show');
+            statusMsg.innerText = 'Login to Modern iSIM';
+            statusMsg.style.color = 'var(--text-muted)';
+        }
+
+        function showLoginView() {
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+            document.getElementById('login-view').style.opacity = '1';
+        }
+
+        function showDashboardView() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+        }
+
+        function switchMainTab(viewId, btn, updateRoute = true) {
+            currentView = viewId;
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId)?.classList.remove('hidden');
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (viewId === 'view-profile') {
+                if (updateRoute) setPageRoute('profile');
+                if (!profileLoaded) fetchProfile(false);
+                return;
+            }
+
+            if (currentAttType === 'subject') {
+                const subjectBtn = document.querySelector('.att-btn[onclick*="showDateFilters"]');
+                showDateFilters('subject', subjectBtn, updateRoute, true);
+                return;
+            }
+            if (updateRoute) setPageRoute(currentAttType);
+            if (!attendanceLoaded || Date.now() - attendanceLoadedAt > 60000) {
+                const attBtn = document.querySelector(`.att-btn[onclick*="'${currentAttType}'"]`) || document.querySelector('.att-btn');
+                loadAttendance(currentAttType, attBtn, false);
+            } else {
+                syncAttendanceTabButtons(currentAttType);
+            }
+        }
+
+        function syncAttendanceTabButtons(type) {
+            document.querySelectorAll('.att-btn').forEach(button => button.classList.remove('active'));
+            const selector = type === 'subject' ? '.att-btn[onclick*="showDateFilters"]' : `.att-btn[onclick*="'${type}'"]`;
+            document.querySelector(selector)?.classList.add('active');
+        }
+
+        async function logoutPortal() {
+            if (sessionId) {
+                try {
+                    await fetch(`${API_BASE}/logout`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId })
+                    });
+                } catch(e) {}
+            }
+            
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+            sessionId = null;
+            profileLoaded = false;
+            attendanceLoaded = false;
+            attendanceLoadedType = null;
+            profileRequestId++;
+            attendanceRequestId++;
+            currentProfilePhoto = null;
+            
+            const topAvatar = document.getElementById('topNavAvatar');
+            if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
+            
+            showLoginView();
+            setPageRoute('login');
+            initSession();
+        }
+
+        async function initSession(forceReload = false) {
+            const requestId = ++captchaRequestId;
+            const captchaImage = document.getElementById('captchaImg');
+            if (captchaImage) {
+                captchaImage.onload = null;
+                captchaImage.onerror = null;
+                captchaImage.removeAttribute('src');
+            }
+            setCaptchaState('loading');
+            if (!loginError.classList.contains('show')) statusMsg.innerText = forceReload ? 'Refreshing captcha…' : 'Connecting to secure server…';
+            statusMsg.style.color = 'var(--text-muted)';
+            try {
+                const res = await fetch(`${API_BASE}/init-session`, { cache: 'no-store' });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || `HTTP ${res.status}`);
+                if (requestId !== captchaRequestId) return;
+                sessionId = data.sessionId;
+                const image = document.getElementById('captchaImg');
+                image.onload = () => {
+                    if (requestId !== captchaRequestId) return;
+                    if (image.naturalWidth > 0) setCaptchaState('ready');
+                    else setCaptchaState('error', 'Captcha image failed to load.');
+                };
+                image.onerror = () => { if (requestId === captchaRequestId) setCaptchaState('error', 'Captcha image failed to load.'); };
+                image.src = data.captchaImage;
+                if (image.complete && image.naturalWidth > 0) setCaptchaState('ready');
+                if (!loginError.classList.contains('show')) statusMsg.innerText = 'Login to Modern iSIM';
+            } catch (e) {
+                if (requestId !== captchaRequestId) return;
+                setCaptchaState('error', `Captcha unavailable: ${e.message}`);
+                if (!loginError.classList.contains('show')) statusMsg.innerText = 'Captcha could not be loaded. Tap the reload option.';
+                statusMsg.style.color = '#b91c1c';
+            }
+        }
+
+        function applyRouteFromLocation() {
+            const route = routeFromUrl();
+            
+            if (!sessionId) {
+                if (route !== 'login') {
+                    setPageRoute('login', true);
+                }
+                showLoginView();
+                return;
+            }
+
+            if (sessionId && route === 'login') {
+                const defaultRoute = currentAttType || 'today';
+                setPageRoute(defaultRoute, true);
+                applyRouteFromLocation();
+                return;
+            }
+
+            showDashboardView();
+            if (route === 'profile') {
+                switchMainTab('view-profile', document.getElementById('tabBtnProfile'), false);
+            } else {
+                const validRoutes = ['today', 'monthly', 'semester', 'subject'];
+                currentAttType = validRoutes.includes(route) ? route : 'today';
+                switchMainTab('view-attendance', document.getElementById('tabBtnAttendance'), false);
+            }
+        }
+
+        async function restoreSessionFromUrl() {
+            if (!sessionId) {
+                applyRouteFromLocation();
+                initSession();
+                return;
+            }
+
+            const pageOverlay = document.getElementById('pageOverlay');
+            const loaderText = document.getElementById('loaderText');
+            const loginView = document.getElementById('login-view');
+            
+            pageOverlay.classList.add('active');
+            loaderText.innerText = "Restoring secure session...";
+            loginView.style.opacity = '0';
+
+            try {
+                const res = await fetch(`${API_BASE}/session/${encodeURIComponent(sessionId)}`, { cache: 'no-store' });
+                const data = await res.json();
+                
+                if (!res.ok || !data.success || !data.loggedIn) {
+                    throw new Error('SESSION_EXPIRED');
+                }
+                
+                if (routeFromUrl() !== 'profile') fetchProfile(true);
+                
+                applyRouteFromLocation();
+                
+            } catch (error) {
+                if (error.message === 'SESSION_EXPIRED') {
+                    localStorage.removeItem(SESSION_STORAGE_KEY);
+                    sessionId = null;
+                    currentProfilePhoto = null;
+                    
+                    const topAvatar = document.getElementById('topNavAvatar');
+                    if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
+                    
+                    applyRouteFromLocation();
+                    initSession();
+                } else {
+                    console.warn("Network Error: Offline hone ke kaaran last session ko active rakha gaya hai.");
+                    applyRouteFromLocation();
+                }
+            } finally {
+                pageOverlay.classList.remove('active');
+                loginView.style.opacity = '1';
+            }
+        }
+
+        const storedSubjectDates = readSubjectDates();
+        const initialUrlParams = new URLSearchParams(location.search);
+        const urlFrom = initialUrlParams.get('from') || '';
+        const urlTo = initialUrlParams.get('to') || '';
+        document.getElementById('dateFrom').value = validDateRange(urlFrom, urlTo) ? urlFrom : storedSubjectDates.from;
+        document.getElementById('dateTo').value = validDateRange(urlFrom, urlTo) ? urlTo : storedSubjectDates.to;
+        if (validDateRange(urlFrom, urlTo)) saveSubjectDates(urlFrom, urlTo);
+        restoreSessionFromUrl();
+        
+        window.addEventListener('popstate', applyRouteFromLocation);
+        window.addEventListener('hashchange', applyRouteFromLocation);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearLoginError();
+            if (!sessionId || !document.getElementById('captchaImg').naturalWidth || !document.getElementById('captchaState').classList.contains('hidden')) {
+                setLoginError('Captcha is not ready yet. Please reload the captcha and try again.');
+                return;
+            }
+            loaderText.innerText = "Authenticating with College Portal...";
+            pageOverlay.classList.add('active');
+            
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId, 
+                        userId: document.getElementById('admNumber').value.trim(),
+                        password: document.getElementById('password').value, 
+                        captcha: document.getElementById('captchaText').value.trim()
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+                    showDashboardView();
+                    
+                    fetchProfile(true);
+                    
+                    currentAttType = 'today';
+                    setPageRoute('today');
+                    currentAttType = 'today';
+                    attendanceLoaded = false;
+                    attendanceLoadedType = null;
+                    switchMainTab('view-attendance', document.getElementById('tabBtnAttendance'), false);
+                } else {
+                    setLoginError(data.error || 'Login failed. Please check details.');
+                    document.getElementById('captchaText').value = '';
+                    await initSession();
+                }
+            } catch(e) {
+                setLoginError('Server connection lost.');
+            } finally {
+                pageOverlay.classList.remove('active');
+            }
+        });
+
+        async function fetchProfile(isBackground = false) {
+            if (profileLoaded) return;
+
+            const requestId = ++profileRequestId;
+            const topAvatar = document.getElementById('topNavAvatar');
+            const topName = document.getElementById('topNavName');
+            const topAdm = document.getElementById('topNavAdm');
+            
+            if (topAvatar) topAvatar.innerHTML = '<div class="mini-spinner"></div>';
+            if (topName) topName.innerHTML = '<span class="skeleton-text" style="width: 80px;"></span>';
+            if (topAdm) topAdm.innerHTML = '<span class="skeleton-text" style="width: 55px;"></span>';
+            
+            if (!isBackground) {
+                loaderText.innerText = "Fetching Student Profile Details...";
+                pageOverlay.classList.add('active');
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/profile?sessionId=${sessionId}`);
+                
+                if (res.status === 401) return showSessionExpiredUI(document.getElementById('dynamicProfileContainer'));
+                const data = await res.json();
+                if (requestId !== profileRequestId) return;
+                
+                if (!data.success && data.error && data.error.toLowerCase().includes('session')) {
+                    return showSessionExpiredUI(document.getElementById('dynamicProfileContainer'));
+                }
+                
+                if (!data.success) {
+                    document.getElementById('dynamicProfileContainer').innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444; font-weight: 600;">Error: ${escapeHtml(data.error || 'Failed to fetch profile details.')}</div>`;
+                    profileLoaded = false;
+                    if (!isBackground) pageOverlay.classList.remove('active');
+                    
+                    if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
+                    if (topName) topName.innerText = 'Student';
+                    if (topAdm) topAdm.innerText = '-';
+                    return;
+                }
+
+                if (data.success) {
+                    const p = data.data;
+                    const elProfName = document.getElementById('profName');
+                    const elProfAdm = document.getElementById('profAdm');
+                    if(elProfName) elProfName.innerText = p.headerName || '-';
+                    if(elProfAdm) elProfAdm.innerText = p.headerAdmNo || '-';
+
+                    if(topName) topName.innerText = p.headerName || 'Student';
+                    if(topAdm) topAdm.innerText = p.headerAdmNo || '';
+
+                    if(p.photo) {
+                        currentProfilePhoto = safeImageUrl(p.photo) || null;
+                    } else {
+                        currentProfilePhoto = null;
+                    }
+
+                    const profImg = document.getElementById('profImg');
+                    const defSvg = document.getElementById('profDefaultSvg');
+                    
+                    if (currentProfilePhoto) {
+                        if (profImg) { 
+                            profImg.src = currentProfilePhoto; 
+                            profImg.classList.remove('hidden');
+                            profImg.onload = function() {
+                                if (this.naturalWidth <= 1) window.handleImageError(this);
+                            };
+                        }
+                        if (defSvg) defSvg.classList.add('hidden');
+                        
+                        if (topAvatar) {
+                            const avatarImage = Object.assign(document.createElement('img'), { 
+                                src: currentProfilePhoto, alt: 'Profile photo', style: 'width:100%;height:100%;object-fit:cover;' 
+                            });
+                            
+                            const handleTopNavErr = () => { 
+                                topAvatar.innerHTML = defaultProfileSvg; 
+                                currentProfilePhoto = null; 
+                                if(profImg) window.handleImageError(profImg);
+                            };
+                            
+                            avatarImage.onerror = handleTopNavErr;
+                            avatarImage.onload = () => {
+                                if (avatarImage.naturalWidth <= 1) handleTopNavErr();
+                            };
+                            
+                            topAvatar.replaceChildren(avatarImage);
+                        }
+                    } else {
+                        if (profImg) { profImg.classList.add('hidden'); profImg.removeAttribute('src'); }
+                        if (defSvg) defSvg.classList.remove('hidden');
+                        if (topAvatar) { topAvatar.innerHTML = defaultProfileSvg; }
+                    }
+
+                    let html = '';
+                    if (p.sections && p.sections.length > 0) {
+                        p.sections.forEach(sec => {
+                            html += `<div class="profile-section-title">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        ${escapeHtml(sec.title)}
+                                    </div><div class="profile-grid">`;
+                            if (sec.rows) {
+                                sec.rows.forEach(row => {
+                                    html += `<div class="prof-item"><div class="prof-label">${escapeHtml(row.key)}</div><div class="prof-val">${escapeHtml(row.val) || '-'}</div></div>`;
+                                });
+                            }
+                            html += `</div>`;
+                        });
+                    } else {
+                        html = `<div style="text-align: center; padding: 40px; color: var(--text-muted); font-weight: 500;">No profile data found.</div>`;
+                    }
+                    document.getElementById('dynamicProfileContainer').innerHTML = html;
+                    profileLoaded = true;
+                }
+            } catch(e) { 
+                if (requestId !== profileRequestId) return;
+                console.error("Profile load error:", e); 
+                document.getElementById('dynamicProfileContainer').innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444; font-weight: 600;">Error: Failed to process profile.</div>`;
+                if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
+                if (topName) topName.innerText = 'Student';
+                if (topAdm) topAdm.innerText = '-';
+            } finally {
+                if (!isBackground) {
+                    pageOverlay.classList.remove('active');
+                }
+            }
+        }
+
+        function openProfileLightbox() {
+            if (currentProfilePhoto) {
+                document.getElementById('lightboxImg').src = currentProfilePhoto;
+                document.getElementById('imageLightbox').classList.add('active');
+            }
+        }
+
+        function closeLightbox() {
+            document.getElementById('imageLightbox').classList.remove('active');
+        }
+
+        function showDateFilters(type, btn, updateRoute = true, autoLoadSaved = true) {
+            currentAttType = 'subject';
+            if (updateRoute) setPageRoute('subject');
+            syncAttendanceTabButtons('subject');
+            document.getElementById('dateFilters').classList.remove('hidden');
+            document.getElementById('todaySummaryBox').classList.add('hidden');
+            const saved = readSubjectDates();
+            const fromInput = document.getElementById('dateFrom');
+            const toInput = document.getElementById('dateTo');
+            if (saved.from && !fromInput.value) fromInput.value = saved.from;
+            if (saved.to && !toInput.value) toInput.value = saved.to;
+            const from = fromInput.value || saved.from;
+            const to = toInput.value || saved.to;
+            if (validDateRange(from, to) && autoLoadSaved && (!attendanceLoaded || attendanceLoadedType !== 'subject' || Date.now() - attendanceLoadedAt > 60000)) {
+                fromInput.value = from;
+                toInput.value = to;
+                executeAttendanceFetch('subject', from, to);
+            } else if (!validDateRange(from, to)) {
+                attendanceLoaded = false;
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                document.getElementById('attThead').innerHTML = '<tr><th>Subject</th><th>Attendance</th></tr>';
+                document.getElementById('attTbody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:28px;color:var(--text-muted)">Select a date range and tap Fetch to view subject-wise attendance.</td></tr>';
+            }
+        }
+
+        function applyDateFilter() {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            if (!validDateRange(from, to)) return alert('Please select a valid date range (From must not be after To).');
+            saveSubjectDates(from, to);
+            currentAttType = 'subject';
+            setPageRoute('subject');
+            executeAttendanceFetch('subject', from, to);
+        }
+
+        function loadAttendance(type, btn, updateRoute = true) {
+            if (type === 'subject') return showDateFilters('subject', btn, updateRoute, true);
+            if (updateRoute) setPageRoute(type);
+            syncAttendanceTabButtons(type);
+            document.getElementById('dateFilters').classList.add('hidden');
+            document.getElementById('todaySummaryBox').classList.toggle('hidden', type !== 'today');
+            currentAttType = type;
+            executeAttendanceFetch(type);
+        }
+
+        async function executeAttendanceFetch(type, fromDate = null, toDate = null) {
+            if (type === 'subject') {
+                const saved = readSubjectDates();
+                fromDate = fromDate || document.getElementById('dateFrom').value || saved.from;
+                toDate = toDate || document.getElementById('dateTo').value || saved.to;
+                if (!validDateRange(fromDate, toDate)) {
+                    showDateFilters('subject', null, false, false);
+                    return;
+                }
+                saveSubjectDates(fromDate, toDate);
+            }
+            const requestId = ++attendanceRequestId;
+            attendanceLoaded = false;
+            document.getElementById('attTableContainer').classList.add('hidden');
+            document.getElementById('todaySummaryBox').classList.add('hidden');
+            document.getElementById('attLoading').classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${API_BASE}/attendance/${type}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, fromDate, toDate })
+                });
+                
+                if (res.status === 401) return showSessionExpiredUI(document.getElementById('attTbody'), true);
+                if (!res.ok && res.status !== 400) throw new Error(`Request failed (${res.status})`);
+
+                const response = await res.json();
+                if (requestId !== attendanceRequestId) return;
+                
+                if (!response.success && response.error && response.error.toLowerCase().includes('session')) {
+                    return showSessionExpiredUI(document.getElementById('attTbody'), true);
+                }
+                
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+
+                if (response.success) {
+                    attendanceLoaded = true;
+                    attendanceLoadedType = type;
+                    attendanceLoadedAt = Date.now();
+                    renderAttendanceTable(type, response.data);
+                } else {
+                    document.getElementById('attTbody').innerHTML = `<tr><td colspan="4" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">${escapeHtml(response.error || 'Failed to fetch records.')}</td></tr>`;
+                }
+            } catch(e) {
+                if (requestId !== attendanceRequestId) return;
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                document.getElementById('attTbody').innerHTML = `<tr><td colspan="4" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">Network disconnected.</td></tr>`;
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+
+        function getStatusBadge(status) {
+            const code = String(status || '').toUpperCase();
+            const labels = { P: 'Present', A: 'Absent', NM: 'Not Mentioned' };
+            const cls = code === 'P' ? 'badge-present' : code === 'A' ? 'badge-absent' : code === 'NM' ? 'badge-nm' : 'badge-default';
+            return `<button type="button" class="badge status-badge ${cls}" data-tooltip="${labels[code] || escapeHtml(status || 'Status unavailable')}" aria-label="${labels[code] || escapeHtml(status || 'Status unavailable')}">${escapeHtml(code || '-')}</button>`;
+        }
+
+        function getProgressBarColor(num) {
+            if(num >= 85) return '#22c55e'; 
+            if(num >= 75) return '#84cc16'; 
+            if(num >= 60) return '#eab308'; 
+            if(num >= 45) return '#f97316'; 
+            return '#ef4444'; 
+        }
+
+        function renderAttendanceTable(type, data) {
+            const head = document.getElementById('attThead');
+            const body = document.getElementById('attTbody');
+            const table = head.closest('table');
+            if (table) {
+                table.classList.toggle('today-table', type === 'today');
+                table.classList.toggle('gauge-table', ['monthly', 'semester', 'subject'].includes(type));
+            }
+            let html = '';
+
+            if (!data || data.length === 0) {
+                head.innerHTML = '';
+                body.innerHTML = '<tr><td colspan="4" style="padding: 40px; text-align:center; color: var(--text-muted); font-weight:500; font-size: 16px;">No records found for this selection.</td></tr>';
+                return;
+            }
+
+            if (type === 'today') {
+                head.innerHTML = `<tr><th style="width:38%">Subject</th><th style="width:22%">Faculty</th><th style="width:24%">Time</th><th style="width:16%">Status</th></tr>`;
+                let present = 0, absent = 0, nm = 0;
+
+                data.forEach(r => {
+                    if (r._rawStatus === 'P') present++;
+                    else if (r._rawStatus === 'A') absent++;
+                    else if (r._rawStatus === 'NM') nm++;
+
+                    const subjectType = r.type && r.type !== '-' ? String(r.type) : '';
+                    let formattedTime = r.time || '-';
+                    formattedTime = formattedTime.replace(/(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*\2/i, '$1 - $3 $2');
+                    
+                    html += `<tr>
+                        <td><div class="subject-cell">
+                            <div class="today-subject-title">${escapeHtml(r.rawSubject || r.subject)}</div>
+                            <div class="today-subject-meta">${r.code ? `<span>(${escapeHtml(r.code)})</span>` : ''}${subjectType ? `<span>(${escapeHtml(subjectType)})</span>` : ''}</div>
+                        </div></td>
+                        <td>${escapeHtml(r.faculty || '-')}</td>
+                        <td><span style="white-space: nowrap;">${escapeHtml(formattedTime)}</span></td>
+                        <td>${getStatusBadge(r._rawStatus)}</td>
+                    </tr>`;
+                });
+
+                const total = present + absent + nm;
+                const pPct = total ? ((present / total) * 100).toFixed(1) : 0;
+                const aPct = total ? ((absent / total) * 100).toFixed(1) : 0;
+                const nmPct = total ? ((nm / total) * 100).toFixed(1) : 0;
+
+                document.getElementById('todayStatRatio').innerText = `${present}/${total} Classes Marked Present`;
+                
+                document.getElementById('summaryBarTrack').innerHTML = `
+                    <div class="summary-segment seg-present" style="width: 0%;" data-width="${pPct}%"></div>
+                    <div class="summary-segment seg-absent" style="width: 0%;" data-width="${aPct}%"></div>
+                    <div class="summary-segment seg-nm" style="width: 0%;" data-width="${nmPct}%"></div>
+                `;
+                
+                document.getElementById('summaryLegend').innerHTML = `
+                    <div class="legend-item"><div class="legend-dot seg-present"></div> Present: ${present} (${pPct}%)</div>
+                    <div class="legend-item"><div class="legend-dot seg-absent"></div> Absent: ${absent} (${aPct}%)</div>
+                    <div class="legend-item"><div class="legend-dot seg-nm"></div> Not Mentioned: ${nm} (${nmPct}%)</div>
+                `;
+                document.getElementById('todaySummaryBox').classList.remove('hidden');
+                setTimeout(() => {
+                    document.querySelectorAll('.summary-segment').forEach(seg => {
+                        seg.style.width = seg.getAttribute('data-width');
+                    });
+                }, 20);
+
+            } else if (type === 'monthly' || type === 'semester' || type === 'subject') {
+                head.innerHTML = '';
+                const gauges = data.map(r => {
+                    const parsed = Number.parseFloat(r.value);
+                    const num = Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : 0;
+                    const displayValue = Number.isFinite(parsed) ? `${Number(parsed.toFixed(1))}%` : '—';
+                    const ringColor = getProgressBarColor(num);
+                    const circumference = 251.327;
+                    const dashOffset = circumference * (1 - num / 100);
+                    return `<div class="attendance-gauge-card">
+                        <div class="attendance-gauge" role="img" aria-label="${escapeHtml(r.label)}: ${escapeHtml(displayValue)}">
+                            <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                                <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                <circle class="gauge-value-ring" cx="50" cy="50" r="40" stroke="${ringColor}" stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" data-offset="${dashOffset}"></circle>
+                            </svg>
+                            <div class="attendance-gauge-value">${escapeHtml(displayValue)}</div>
+                        </div>
+                        <div class="attendance-gauge-label">${escapeHtml(r.label)}</div>
+                    </div>`;
+                }).join('');
+                html = `<tr><td colspan="2"><div class="attendance-gauge-grid">${gauges}</div></td></tr>`;
+            }
+            body.innerHTML = html;
+
+            if (['monthly', 'semester', 'subject'].includes(type)) {
+                setTimeout(() => {
+                    document.querySelectorAll('.gauge-value-ring').forEach(ring => {
+                        ring.setAttribute('stroke-dashoffset', ring.getAttribute('data-offset'));
+                    });
+                }, 20);
+            }
+        }
+
+        document.getElementById('dateFrom').addEventListener('change', () => {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            if (validDateRange(from, to)) saveSubjectDates(from, to);
+        });
+        document.getElementById('dateTo').addEventListener('change', () => {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            if (validDateRange(from, to)) saveSubjectDates(from, to);
+        });
+
+        window.addEventListener('contextmenu', (e) => {
+            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
