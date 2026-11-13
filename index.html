@@ -166,7 +166,75 @@
         .session-expired-state { text-align:center; padding: 60px 20px; }
         .session-expired-state h3 { font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 12px; }
         .session-expired-state p { color: var(--text-muted); font-size: 15px; font-weight: 500; margin-bottom: 24px; }
-        
+
+        .theme-picker-wrapper { position: relative; display: flex; align-items: center; }
+        .theme-trigger-btn { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #e2e8f0; background: #fff; padding: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
+        .theme-trigger-btn:hover { border-color: var(--primary); transform: scale(1.06); }
+        .theme-trigger-dot { width: 100%; height: 100%; border-radius: 50%; display: block; background: var(--primary); }
+        .theme-popover { position: absolute; top: 52px; right: 0; background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14); z-index: 200; width: 224px; display: none; flex-direction: column; gap: 10px; }
+        .theme-popover.open { display: flex; animation: errorIn 0.2s ease-out; }
+        .theme-popover-title { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .theme-swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; justify-items: center; }
+        .theme-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1.5px #cbd5e1; cursor: pointer; transition: 0.2s; padding: 0; }
+        .theme-swatch:hover { transform: scale(1.15); }
+        .theme-swatch.selected { box-shadow: 0 0 0 2.5px var(--text-dark); transform: scale(1.12); }
+        .theme-swatch.rainbow { background: conic-gradient(#ef4444, #f59e0b, #10b981, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444); }
+        .theme-mode-switch { display: flex; background: #f1f5f9; padding: 3px; border-radius: 10px; gap: 3px; border: 1px solid #e2e8f0; }
+        .theme-mode-btn { flex: 1; border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 700; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .theme-mode-btn svg { width: 14px; height: 14px; }
+        .theme-mode-btn.active { background: #ffffff; color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .theme-divider { height: 1px; background: #e2e8f0; width: 100%; }
+
+        body.dark-mode {
+            --bg-color: #0b1120;
+            --card-bg: #111827;
+            --text-dark: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        body.dark-mode .top-nav,
+        body.dark-mode .card,
+        body.dark-mode .login-card,
+        body.dark-mode .theme-popover { background: #111827; border-color: #1f2937; }
+        body.dark-mode .top-nav { box-shadow: 0 2px 15px rgba(0,0,0,0.35); }
+        body.dark-mode .card { box-shadow: 0 4px 25px rgba(0,0,0,0.25); }
+        body.dark-mode .login-card h2,
+        body.dark-mode .brand,
+        body.dark-mode .top-profile-name,
+        body.dark-mode .profile-header h2,
+        body.dark-mode .profile-section-title,
+        body.dark-mode .prof-val,
+        body.dark-mode .data-table td { color: #f1f5f9; }
+        body.dark-mode .top-profile-badge,
+        body.dark-mode .today-summary-bar,
+        body.dark-mode .filter-row,
+        body.dark-mode .prof-item,
+        body.dark-mode .input-wrapper input,
+        body.dark-mode .captcha-box,
+        body.dark-mode .theme-mode-switch { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+        body.dark-mode .top-profile-badge:hover { background: #263349; }
+        body.dark-mode .date-input-group,
+        body.dark-mode .theme-trigger-btn { background: #0f172a; border-color: #334155; }
+        body.dark-mode .date-input-group input { color: #f1f5f9; color-scheme: dark; }
+        body.dark-mode .input-wrapper input:focus { background: #0f172a; }
+        body.dark-mode .att-btn { border-color: #334155; color: #94a3b8; }
+        body.dark-mode .att-btn.active { color: #ffffff; border-color: var(--primary); }
+        body.dark-mode .table-responsive { border-color: #1f2937; }
+        body.dark-mode .data-table th { background: #1e293b; color: #94a3b8; border-bottom-color: #334155; }
+        body.dark-mode .data-table td { border-bottom-color: #1f2937; }
+        body.dark-mode .data-table tbody tr:hover { background-color: #1e293b; }
+        body.dark-mode .summary-bar-track { background: #334155; }
+        body.dark-mode .gauge-track { stroke: #334155; }
+        body.dark-mode .badge-default { background: #334155; color: #cbd5e1; }
+        body.dark-mode .profile-header { border-bottom-color: #1f2937; }
+        body.dark-mode .profile-avatar-wrapper { border-color: #1e293b; }
+        body.dark-mode .theme-mode-btn.active { background: #0f172a; color: var(--primary); }
+        body.dark-mode .theme-divider { background: #1f2937; }
+        body.dark-mode .theme-swatch { border-color: #111827; box-shadow: 0 0 0 1.5px #475569; }
+        body.dark-mode .theme-swatch.selected { box-shadow: 0 0 0 2.5px #f8fafc; }
+        body.dark-mode .page-overlay { background: rgba(11, 17, 32, 0.85); }
+        body.dark-mode .logout-btn { background: rgba(239, 68, 68, 0.16); color: #f87171; }
+        body.dark-mode .logout-btn:hover { background: rgba(239, 68, 68, 0.26); }
+        body.dark-mode .skeleton-text { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; }
         @media (max-width: 768px) {
             .hide-mobile { display: none !important; }
             .top-nav { height: 68px; padding: 0 12px; align-items: center; }
@@ -197,11 +265,13 @@
             .attendance-gauge-value { font-size:18px; }
             .attendance-gauge-label { font-size:12px; max-width:125px; }
             .gauge-table tbody td { padding:16px 8px; }
-            .badge { min-width:0; padding:5px 7px; font-size:11px; }
+            .badge { min-width:35px; padding:5px 7px; font-size:11px; }
             .summary-legend { gap:8px; font-size:11px; }
             .filter-row { padding:12px; gap:8px; }
             .date-input-group { width:100%; justify-content:space-between; }
             .date-input-group input { max-width:65%; }
+            .theme-trigger-btn { width: 34px; height: 34px; }
+            .theme-popover { right: -42px; width: 214px; padding: 12px; }
         }
     </style>
 </head>
@@ -275,6 +345,27 @@
                         <span class="top-profile-adm" id="topNavAdm">-</span>
                     </div>
                 </div>
+                <div class="theme-picker-wrapper" id="themePickerWrapper">
+                    <button type="button" class="theme-trigger-btn" id="themeTriggerBtn" onclick="toggleThemeMenu(event)" title="Change Theme Color" aria-label="Change Theme Color">
+                        <span class="theme-trigger-dot" id="themeTriggerDot"></span>
+                    </button>
+                    <div class="theme-popover" id="themePopover" onclick="event.stopPropagation()">
+                        <div class="theme-popover-title">Appearance</div>
+                        <div class="theme-mode-switch">
+                            <button type="button" class="theme-mode-btn active" id="btnModeLight" onclick="setDarkMode(false)">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+                                <span>Light</span>
+                            </button>
+                            <button type="button" class="theme-mode-btn" id="btnModeDark" onclick="setDarkMode(true)">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+                                <span>Dark</span>
+                            </button>
+                        </div>
+                        <div class="theme-divider"></div>
+                        <div class="theme-popover-title">Accent Color</div>
+                        <div class="theme-swatch-grid" id="themeSwatchGrid"></div>
+                    </div>
+                </div>
                 <button class="logout-btn" onclick="logoutPortal()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     <span>Logout</span>
@@ -286,16 +377,30 @@
             <div id="view-attendance" class="view-section">
                 <div class="card">
                     <div class="att-tabs">
-                        <button class="att-btn active" onclick="loadAttendance('today', this)">Today's Attendance</button>
+                        <button class="att-btn active" onclick="loadAttendance('today', this)">Date-Wise Attendance</button>
                         <button class="att-btn" onclick="loadAttendance('monthly', this)">Monthly Attendance</button>
                         <button class="att-btn" onclick="loadAttendance('semester', this)">Semester Analytics</button>
                         <button class="att-btn" onclick="showDateFilters('subject', this)">Subject Wise</button>
                     </div>
 
+                    <div id="dateWiseNavBlock" class="filter-row" style="flex-wrap: nowrap; gap: 8px; padding: 10px 12px;">
+                        <button type="button" id="btnPrevDate" class="btn-small" onclick="navigateDate(-1)" title="Previous Date with Attendance" aria-label="Previous Date" style="padding: 8px 12px; flex-shrink: 0;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <div class="date-input-group" onclick="openDatePicker()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDatePicker();}" style="position: relative; width: auto; flex: 1; max-width: 240px; justify-content: center; gap: 8px; padding: 8px 14px; min-width: 0; cursor: pointer; user-select: none;">
+                            <span id="selectedDateText" style="font-weight: 800; font-size: 14px; color: var(--text-dark); letter-spacing: 0.3px; white-space: nowrap;">--/--/----</span>
+                            <span id="selectedDayBadge" class="badge badge-default" style="font-size: 10px; padding: 3px 7px; min-width: auto; white-space: nowrap;">Today</span>
+                            <input type="date" id="selectedAttendanceDate" onchange="handleCustomDateSelect(this.value)" tabindex="-1" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none;">
+                        </div>
+                        <button type="button" id="btnNextDate" class="btn-small" onclick="navigateDate(1)" title="Next Date with Attendance" aria-label="Next Date" style="padding: 8px 12px; flex-shrink: 0; opacity: 0.5; cursor: not-allowed;" disabled>
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
                     <div id="todaySummaryBox" class="today-summary-bar hidden">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span style="font-weight: 800; font-size: 14px; text-transform: uppercase; color: var(--text-muted);">Today's Attendance Statistics</span>
-                            <span id="todayStatRatio" style="font-weight: 800; font-size: 14px; color: var(--primary);">0/0 Classes Marked</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 6px; white-space: nowrap;">
+                            <span id="todaySummaryTitle" style="font-weight: 800; font-size: 12px; text-transform: uppercase; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis;">Today • Stats</span>
+                            <span id="todayStatRatio" style="font-weight: 800; font-size: 12px; color: var(--primary); flex-shrink: 0;">0/0 Classes Present</span>
                         </div>
                         <div class="summary-bar-track" id="summaryBarTrack"></div>
                         <div class="summary-legend" id="summaryLegend"></div>
@@ -316,8 +421,15 @@
                         </button>
                     </div>
 
-                    <div id="attLoading" class="hidden" style="text-align:center; padding:50px; font-weight: 600; color:var(--primary); display:flex; flex-direction:column; align-items:center; gap:15px; font-size: 16px;">
-                        <div class="spinner"></div> Synchronizing Data...
+                    <div id="attLoading" class="hidden" style="text-align:center; padding:50px 20px; font-weight: 600; color:var(--primary); display:flex; flex-direction:column; align-items:center; gap:14px; font-size: 16px;">
+                        <div class="spinner"></div>
+                        <div id="attLoadingStatus" style="font-weight: 800; font-size: 17px; color: var(--primary);">Synchronizing Data...</div>
+                        <div id="attLoadingDate" class="badge badge-default hidden" style="font-size: 13px; padding: 6px 14px;">Date: --/--/----</div>
+                        <div id="attLoadingSub" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Please wait while we communicate with the server.</div>
+                        <button type="button" id="btnStopSearch" class="logout-btn hidden" onclick="stopAttendanceSearch()" style="margin-top: 6px; padding: 8px 20px; height: auto; border-radius: 100px;">
+                            <svg fill="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                            <span style="display: inline !important;">Stop Search</span>
+                        </button>
                     </div>
                     
                     <div id="attTableContainer" class="table-responsive">
@@ -350,13 +462,13 @@
     </div>
 
     <script>
-        const API_BASE = 'https://glb-portal-backend.onrender.com/api';
+        const API_BASE = 'http://localhost:3000/api';
+        const BASE_PORTAL_URL = 'https://glb.servergi.com:8071/iSIMGLBMTR';
         const SESSION_STORAGE_KEY = 'glb_student_portal_session';
         const SUBJECT_DATES_STORAGE_KEY = 'glb_subject_attendance_dates_v1';
         let sessionId = localStorage.getItem(SESSION_STORAGE_KEY) || null;
         let currentAttType = 'today';
         let profileLoaded = false;
-        
         let currentProfilePhoto = null;
         
         let attendanceLoaded = false;
@@ -367,12 +479,1034 @@
         let captchaRequestId = 0;
         let currentView = 'view-attendance';
 
+        let currentSelectedDate = getTodayIsoDate();
+        let searchInFlight = false;
+        let searchDirection = 0;
+        let activeSearchAbortController = null;
+        let cachedWeeklyTimetable = null;
+        const dateAttendanceCache = new Map();
+
         const pageOverlay = document.getElementById('pageOverlay');
         const loaderText = document.getElementById('loaderText');
         const statusMsg = document.getElementById('statusMsg');
         const loginError = document.getElementById('loginError');
-        
+
+        const THEME_PREF_KEY = 'glb_selected_theme_mode';
+        const DARK_MODE_KEY = 'glb_dark_mode_enabled';
+        const PORTAL_THEMES = [
+            { name: 'Indigo', primary: '#4f46e5', hover: '#4338ca', soft: '#e0e7ff', tint: '#eef2ff', rgb: '79, 70, 229' },
+            { name: 'Royal Blue', primary: '#2563eb', hover: '#1d4ed8', soft: '#dbeafe', tint: '#eff6ff', rgb: '37, 99, 235' },
+            { name: 'Emerald', primary: '#059669', hover: '#047857', soft: '#d1fae5', tint: '#ecfdf5', rgb: '5, 150, 105' },
+            { name: 'Violet', primary: '#7c3aed', hover: '#6d28d9', soft: '#ede9fe', tint: '#f5f3ff', rgb: '124, 58, 237' },
+            { name: 'Rose', primary: '#e11d48', hover: '#be123c', soft: '#ffe4e6', tint: '#fff1f2', rgb: '225, 29, 72' },
+            { name: 'Cyan', primary: '#0891b2', hover: '#0e7490', soft: '#cffafe', tint: '#ecfeff', rgb: '8, 145, 178' },
+            { name: 'Amber', primary: '#d97706', hover: '#b45309', soft: '#fef3c7', tint: '#fffbeb', rgb: '217, 119, 6' },
+            { name: 'Fuchsia', primary: '#c026d3', hover: '#a21caf', soft: '#fae8ff', tint: '#fdf4ff', rgb: '192, 38, 211' },
+            { name: 'Teal', primary: '#0d9488', hover: '#0f766e', soft: '#ccfbf1', tint: '#f0fdfa', rgb: '13, 148, 136' },
+            { name: 'Crimson', primary: '#dc2626', hover: '#b91c1c', soft: '#fee2e2', tint: '#fef2f2', rgb: '220, 38, 38' },
+            { name: 'Sky', primary: '#0284c7', hover: '#0369a1', soft: '#e0f2fe', tint: '#f0f9ff', rgb: '2, 132, 199' },
+            { name: 'Purple', primary: '#9333ea', hover: '#7e22ce', soft: '#f3e8ff', tint: '#faf5ff', rgb: '147, 51, 234' },
+            { name: 'Mint', primary: '#10b981', hover: '#059669', soft: '#d1fae5', tint: '#ecfdf5', rgb: '16, 185, 129' },
+            { name: 'Coral', primary: '#f43f5e', hover: '#e11d48', soft: '#ffe4e6', tint: '#fff1f2', rgb: '244, 63, 94' },
+            { name: 'Lime', primary: '#65a30d', hover: '#4d7c0f', soft: '#ecfccb', tint: '#f7fee7', rgb: '101, 163, 13' },
+            { name: 'Slate', primary: '#475569', hover: '#334155', soft: '#e2e8f0', tint: '#f8fafc', rgb: '71, 85, 105' },
+            { name: 'Forest', primary: '#166534', hover: '#14532d', soft: '#dcfce7', tint: '#f0fdf4', rgb: '22, 101, 52' },
+            { name: 'Periwinkle', primary: '#6366f1', hover: '#4f46e5', soft: '#e0e7ff', tint: '#eef2ff', rgb: '99, 102, 241' },
+            { name: 'Chocolate', primary: '#92400e', hover: '#78350f', soft: '#fef3c7', tint: '#fffbeb', rgb: '146, 64, 14' }
+        ];
+
         const defaultProfileSvg = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+        function getTodayIsoDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function parseIsoDateLocal(isoStr) {
+            const [y, m, d] = String(isoStr).split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function toIsoDateLocal(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatIsoToDdMmYyyy(isoStr) {
+            if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return '';
+            const [y, m, d] = isoStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getDayNameFromIso(isoStr) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const d = parseIsoDateLocal(isoStr);
+            return days[d.getDay()] || '';
+        }
+
+        function isSundayIso(isoStr) {
+            return parseIsoDateLocal(isoStr).getDay() === 0;
+        }
+
+        function stepDateSkippingSunday(isoStr, direction) {
+            const d = parseIsoDateLocal(isoStr);
+            do {
+                d.setDate(d.getDate() + direction);
+            } while (d.getDay() === 0);
+            return toIsoDateLocal(d);
+        }
+
+        function openDatePicker() {
+            if (searchInFlight) return;
+            const dateInput = document.getElementById('selectedAttendanceDate');
+            if (!dateInput) return;
+            try {
+                if (typeof dateInput.showPicker === 'function') {
+                    dateInput.showPicker();
+                } else {
+                    dateInput.focus();
+                    dateInput.click();
+                }
+            } catch (_) {
+                dateInput.focus();
+            }
+        }
+
+        function setDarkMode(isDark, save = true) {
+            document.body.classList.toggle('dark-mode', Boolean(isDark));
+            if (save) {
+                localStorage.setItem(DARK_MODE_KEY, isDark ? '1' : '0');
+            }
+            const lightBtn = document.getElementById('btnModeLight');
+            const darkBtn = document.getElementById('btnModeDark');
+            if (lightBtn) lightBtn.classList.toggle('active', !isDark);
+            if (darkBtn) darkBtn.classList.toggle('active', Boolean(isDark));
+        }
+
+        function renderThemePalette(idx, isRainbowMode) {
+            const t = PORTAL_THEMES[idx] || PORTAL_THEMES[0];
+            document.documentElement.style.setProperty('--primary', t.primary);
+            document.documentElement.style.setProperty('--primary-hover', t.hover);
+
+            let dynStyle = document.getElementById('dynamic-theme-overrides');
+            if (!dynStyle) {
+                dynStyle = document.createElement('style');
+                dynStyle.id = 'dynamic-theme-overrides';
+                document.head.appendChild(dynStyle);
+            }
+            dynStyle.textContent = `
+                .spinner { border-color: rgba(${t.rgb}, 0.15); border-top-color: var(--primary); }
+                .mini-spinner { border-color: rgba(${t.rgb}, 0.2); border-top-color: var(--primary); }
+                .captcha-loader { border-color: rgba(${t.rgb}, 0.16); border-top-color: var(--primary); }
+                #login-view { background: linear-gradient(135deg, ${t.tint}, ${t.soft}); }
+                body.dark-mode #login-view { background: linear-gradient(135deg, #090d16, #111827); }
+                .input-wrapper input:focus { box-shadow: 0 0 0 4px rgba(${t.rgb}, 0.14); }
+                .captcha-box:active { background: ${t.tint}; }
+                body.dark-mode .captcha-box:active { background: rgba(${t.rgb}, 0.16); }
+                .captcha-box:focus-visible { outline-color: rgba(${t.rgb}, 0.25); }
+                .btn-modern { box-shadow: 0 4px 15px rgba(${t.rgb}, 0.3); }
+                .btn-modern:hover { box-shadow: 0 6px 20px rgba(${t.rgb}, 0.4); }
+                .brand span { background: linear-gradient(100deg, #1e293b, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+                body.dark-mode .brand span { background: linear-gradient(100deg, #f8fafc, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+                .nav-tab.active, .top-profile-avatar, .profile-avatar-wrapper, .profile-header p { background: ${t.soft}; }
+                body.dark-mode .nav-tab.active,
+                body.dark-mode .top-profile-avatar,
+                body.dark-mode .profile-avatar-wrapper,
+                body.dark-mode .profile-header p { background: rgba(${t.rgb}, 0.18); }
+                .att-btn.active { box-shadow: 0 4px 12px rgba(${t.rgb}, 0.22); }
+                .date-input-group:focus-within { box-shadow: 0 0 0 3px rgba(${t.rgb}, 0.14); }
+            `;
+
+            const triggerDot = document.getElementById('themeTriggerDot');
+            if (triggerDot) {
+                if (isRainbowMode) {
+                    triggerDot.style.background = 'conic-gradient(#ef4444, #f59e0b, #10b981, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444)';
+                } else {
+                    triggerDot.style.background = t.primary;
+                }
+            }
+
+            document.querySelectorAll('.theme-swatch').forEach(btn => {
+                const mode = btn.dataset.themeMode;
+                btn.classList.toggle('selected', isRainbowMode ? mode === 'rainbow' : mode === String(idx));
+            });
+        }
+
+        function selectThemeMode(mode, closeMenu = true) {
+            localStorage.setItem(THEME_PREF_KEY, mode);
+            if (mode === 'rainbow') {
+                const lastIdx = parseInt(sessionStorage.getItem('glb_last_theme_idx') ?? '-1', 10);
+                let idx = Math.floor(Math.random() * PORTAL_THEMES.length);
+                if (PORTAL_THEMES.length > 1 && idx === lastIdx) {
+                    idx = (idx + 1) % PORTAL_THEMES.length;
+                }
+                sessionStorage.setItem('glb_last_theme_idx', String(idx));
+                renderThemePalette(idx, true);
+            } else {
+                const idx = Math.max(0, Math.min(PORTAL_THEMES.length - 1, parseInt(mode, 10) || 0));
+                sessionStorage.setItem('glb_last_theme_idx', String(idx));
+                renderThemePalette(idx, false);
+            }
+            if (closeMenu) {
+                const popover = document.getElementById('themePopover');
+                if (popover) popover.classList.remove('open');
+            }
+        }
+
+        function initThemeSwatches() {
+            const grid = document.getElementById('themeSwatchGrid');
+            if (!grid) return;
+            const rainbowBtn = `<button type="button" class="theme-swatch rainbow" data-theme-mode="rainbow" title="Rainbow Mix (Random on Reload)" aria-label="Rainbow Mix" onclick="selectThemeMode('rainbow')"></button>`;
+            const solidBtns = PORTAL_THEMES.map((t, i) =>
+                `<button type="button" class="theme-swatch" data-theme-mode="${i}" title="${t.name}" aria-label="${t.name}" style="background:${t.primary};" onclick="selectThemeMode('${i}')"></button>`
+            ).join('');
+            grid.innerHTML = rainbowBtn + solidBtns;
+        }
+
+        function toggleThemeMenu(e) {
+            if (e) e.stopPropagation();
+            const popover = document.getElementById('themePopover');
+            if (popover) popover.classList.toggle('open');
+        }
+
+        document.addEventListener('click', (e) => {
+            const wrapper = document.getElementById('themePickerWrapper');
+            const popover = document.getElementById('themePopover');
+            if (popover && wrapper && !wrapper.contains(e.target)) {
+                popover.classList.remove('open');
+            }
+        });
+
+        function applyInitialTheme() {
+            initThemeSwatches();
+            const savedDark = localStorage.getItem(DARK_MODE_KEY) === '1';
+            setDarkMode(savedDark, false);
+            const savedMode = localStorage.getItem(THEME_PREF_KEY) || 'rainbow';
+            selectThemeMode(savedMode, false);
+        }
+        applyInitialTheme();
+
+        function updateDateNavigationUI() {
+            const todayIso = getTodayIsoDate();
+            const dateInput = document.getElementById('selectedAttendanceDate');
+            const dateText = document.getElementById('selectedDateText');
+            const nextBtn = document.getElementById('btnNextDate');
+            const prevBtn = document.getElementById('btnPrevDate');
+            const stopBtn = document.getElementById('btnStopSearch');
+            const dayBadge = document.getElementById('selectedDayBadge');
+            const summaryTitle = document.getElementById('todaySummaryTitle');
+
+            const formattedDate = formatIsoToDdMmYyyy(currentSelectedDate);
+
+            if (dateInput) {
+                dateInput.max = todayIso;
+                dateInput.value = currentSelectedDate;
+                dateInput.disabled = searchInFlight;
+            }
+            if (dateText) {
+                dateText.innerText = formattedDate;
+            }
+            if (stopBtn) {
+                stopBtn.classList.toggle('hidden', !searchInFlight);
+            }
+
+            const dayName = getDayNameFromIso(currentSelectedDate);
+            const isToday = currentSelectedDate === todayIso;
+            if (dayBadge) {
+                dayBadge.innerText = isToday ? 'Today' : dayName.slice(0, 3);
+            }
+            if (summaryTitle) {
+                summaryTitle.innerText = isToday
+                    ? 'Today • Stats'
+                    : `${formattedDate} (${dayName.slice(0, 3)})`;
+            }
+
+            const prevIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M15 19l-7-7 7-7"></path></svg>`;
+            const nextIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 5l7 7-7 7"></path></svg>`;
+            const stopIcon = `<svg fill="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>`;
+
+            if (prevBtn) {
+                if (searchInFlight && searchDirection < 0) {
+                    prevBtn.disabled = false;
+                    prevBtn.style.opacity = '1';
+                    prevBtn.style.cursor = 'pointer';
+                    prevBtn.style.background = '#ef4444';
+                    prevBtn.innerHTML = stopIcon;
+                    prevBtn.title = 'Stop Search';
+                } else {
+                    prevBtn.disabled = searchInFlight;
+                    prevBtn.style.opacity = searchInFlight ? '0.5' : '1';
+                    prevBtn.style.cursor = searchInFlight ? 'not-allowed' : 'pointer';
+                    prevBtn.style.background = '';
+                    prevBtn.innerHTML = prevIcon;
+                    prevBtn.title = 'Previous Date with Attendance';
+                }
+            }
+
+            const nextCandidate = stepDateSkippingSunday(currentSelectedDate, 1);
+            const disableNext = currentSelectedDate >= todayIso || nextCandidate > todayIso;
+            if (nextBtn) {
+                if (searchInFlight && searchDirection > 0) {
+                    nextBtn.disabled = false;
+                    nextBtn.style.opacity = '1';
+                    nextBtn.style.cursor = 'pointer';
+                    nextBtn.style.background = '#ef4444';
+                    nextBtn.innerHTML = stopIcon;
+                    nextBtn.title = 'Stop Search';
+                } else {
+                    const isLocked = searchInFlight || disableNext;
+                    nextBtn.disabled = isLocked;
+                    nextBtn.style.opacity = isLocked ? '0.5' : '1';
+                    nextBtn.style.cursor = isLocked ? 'not-allowed' : 'pointer';
+                    nextBtn.style.background = '';
+                    nextBtn.innerHTML = nextIcon;
+                    nextBtn.title = 'Next Date with Attendance';
+                }
+            }
+        }
+
+        function setLoadingProgress(statusText, checkedDateStr = null, subText = '') {
+            const loadingBox = document.getElementById('attLoading');
+            const statusEl = document.getElementById('attLoadingStatus');
+            const dateEl = document.getElementById('attLoadingDate');
+            const subEl = document.getElementById('attLoadingSub');
+
+            if (loadingBox) loadingBox.classList.remove('hidden');
+            if (statusEl) statusEl.innerText = statusText || 'Synchronizing Data...';
+            if (dateEl) {
+                if (checkedDateStr) {
+                    dateEl.innerText = `Date: ${checkedDateStr}`;
+                    dateEl.classList.remove('hidden');
+                } else {
+                    dateEl.classList.add('hidden');
+                }
+            }
+            if (subEl) {
+                subEl.innerText = subText || '';
+                subEl.classList.toggle('hidden', !subText);
+            }
+        }
+
+        function cleanText(value) {
+            return String(value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function timeToMinutes(token) {
+            const match = cleanText(token).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+            if (!match) return null;
+            let hour = Number(match[1]);
+            const minute = Number(match[2]);
+            const period = (match[3] || '').toUpperCase();
+            if (minute > 59 || hour > 24) return null;
+            if (period) {
+                if (hour > 12 && hour <= 23) hour %= 12;
+                if (hour === 12 && period === 'AM') hour = 0;
+                else if (hour < 12 && period === 'PM') hour += 12;
+                else if (hour === 12 && period === 'PM') hour = 12;
+            } else if (hour === 24) {
+                hour = 0;
+            }
+            return hour * 60 + minute;
+        }
+
+        function normalizeTime(value) {
+            const cleaned = cleanText(value).replace(/\(P\d+\)/gi, '');
+            const parts = cleaned.split(/\s*[-–—]\s*/);
+            if (parts.length !== 2) return cleaned.replace(/\s+/g, '').toUpperCase();
+            const start = timeToMinutes(parts[0]);
+            const end = timeToMinutes(parts[1]);
+            return start !== null && end !== null ? `${start}-${end}` : cleaned.replace(/\s+/g, '').toUpperCase();
+        }
+
+        function normalizeSubject(subject) {
+            return String(subject || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+        }
+
+        function levenshtein(a, b) {
+            if (a === b) return 0;
+            if (!a.length) return b.length;
+            if (!b.length) return a.length;
+            if (Math.abs(a.length - b.length) > Math.max(a.length, b.length) * 0.75) return Math.max(a.length, b.length);
+
+            let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+            for (let i = 1; i <= a.length; i++) {
+                const current = [i];
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    current[j] = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
+                }
+                previous = current;
+            }
+            return previous[b.length];
+        }
+
+        function similarity(a, b) {
+            a = normalizeSubject(a);
+            b = normalizeSubject(b);
+            if (!a || !b) return 0;
+            if (a === b) return 1;
+            return 1 - (levenshtein(a, b) / Math.max(a.length, b.length));
+        }
+
+        function convertTo12Hour(timeSlot) {
+            return cleanText(timeSlot)
+                .replace(/\(P\d+\)\s*/gi, '')
+                .replace(/(\d{1,2}):(\d{2})\s*(AM|PM)/gi, (_, h, m, period) => {
+                    let hour = parseInt(h, 10);
+                    period = period.toUpperCase();
+                    if (hour > 12) {
+                        hour = hour % 12;
+                        period = 'PM';
+                    } else if (hour === 0) {
+                        hour = 12;
+                        period = 'AM';
+                    }
+                    return `${String(hour).padStart(2, '0')}:${m} ${period}`;
+                })
+                .replace(/\s*[-–—]\s*/g, ' - ');
+        }
+
+        function attendanceLabel(value) {
+            const raw = cleanText(value);
+            const code = raw.toUpperCase();
+            if (code === 'L' || code === 'LECTURE') return 'Lecture';
+            if (code === 'T' || code === 'TUTORIAL') return 'Tutorial';
+            if (code === 'P' || code === 'PRACTICAL' || code === 'LAB') return 'LAB';
+            return raw || '-';
+        }
+
+        function inferSubjectType(subjectName, subjectCode) {
+            const s = `${subjectName || ''} ${subjectCode || ''}`.toUpperCase();
+            if (/\bLAB\b|\bPRACTICAL\b|151|152|153|251|252|253/.test(s)) return 'LAB';
+            return 'Lecture';
+        }
+
+        function normalizeAttendanceStatus(rawStatus) {
+            const cleaned = cleanText(rawStatus).toUpperCase();
+            if (!cleaned) return '';
+            if (cleaned === 'P' || cleaned === 'PRESENT') return 'P';
+            if (cleaned === 'A' || cleaned === 'ABSENT') return 'A';
+            if (cleaned === 'NM' || cleaned.includes('NOT MENTION')) return 'NM';
+            return cleaned;
+        }
+
+        function parseHtmlDocument(htmlString) {
+            const parser = new DOMParser();
+            return parser.parseFromString(String(htmlString || ''), 'text/html');
+        }
+
+        function parseProfileHtmlOnFrontend(htmlString) {
+            const doc = parseHtmlDocument(htmlString);
+            const imgEl = doc.querySelector('#MCPH1_SCPH_ViewStudentPhoto_ifrmaeImg');
+            const photoSrc = imgEl ? imgEl.getAttribute('src') : null;
+            let resolvedPhoto = null;
+            if (photoSrc) {
+                try {
+                    resolvedPhoto = new URL(photoSrc, BASE_PORTAL_URL + '/').href;
+                } catch (_) {}
+            }
+
+            const profileData = {
+                headerName: cleanText(doc.querySelector('#MCPH1_SCPH_lblName')?.textContent),
+                headerAdmNo: cleanText(doc.querySelector('#MCPH1_SCPH_lblAdmNo')?.textContent),
+                photo: resolvedPhoto,
+                sections: []
+            };
+
+            let skippedCombinedPersonalSection = false;
+            doc.querySelectorAll('#Personal table').forEach(table => {
+                const headingEl = table.querySelector('tr.top-heading th.first');
+                const sectionTitle = cleanText(headingEl?.textContent);
+                if (!sectionTitle) return;
+                if (/^personal information$/i.test(sectionTitle) && !skippedCombinedPersonalSection) {
+                    skippedCombinedPersonalSection = true;
+                    return;
+                }
+                const rows = [];
+                table.querySelectorAll('tr.trr1, tr.trr2').forEach(tr => {
+                    const tds = tr.querySelectorAll('td');
+                    if (tds.length === 2) {
+                        const key = cleanText(tds[0].textContent).replace(/:$/, '');
+                        const val = cleanText(tds[1].textContent);
+                        if (key) rows.push({ key, val });
+                    }
+                });
+                if (rows.length) profileData.sections.push({ title: sectionTitle, rows });
+            });
+
+            return profileData;
+        }
+
+        function parseWeeklyTimetableHtml(htmlString) {
+            const doc = parseHtmlDocument(htmlString);
+            const table = doc.querySelector('#MCPH1_SCPH_gvTimeTable');
+            if (!table) return null;
+
+            const byDay = {
+                Monday: [],
+                Tuesday: [],
+                Wednesday: [],
+                Thursday: [],
+                Friday: [],
+                Saturday: [],
+                Sunday: []
+            };
+            const allRows = [];
+            let currentDay = '';
+
+            table.querySelectorAll('tr').forEach((tr, idx) => {
+                if (idx === 0 || tr.classList.contains('top-heading') || tr.querySelector('th')) return;
+                const firstTd = tr.querySelector('td');
+                if (firstTd) {
+                    const candidateDay = cleanText(firstTd.textContent);
+                    if (/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/i.test(candidateDay)) {
+                        currentDay = candidateDay.charAt(0).toUpperCase() + candidateDay.slice(1).toLowerCase();
+                    }
+                }
+
+                const spans = Array.from(tr.querySelectorAll('span.ctrltxt')).map(s => cleanText(s.textContent));
+                if (spans.length >= 5) {
+                    const entry = {
+                        day: currentDay,
+                        subjectCode: spans[0] || '',
+                        subject: spans[1] || '',
+                        faculty: spans[2] || '',
+                        group: spans[3] || '',
+                        timeSlot: spans[4] || '',
+                        hall: spans[5] || ''
+                    };
+                    if (entry.subject || entry.timeSlot) {
+                        if (currentDay && byDay[currentDay]) {
+                            byDay[currentDay].push(entry);
+                        }
+                        allRows.push(entry);
+                    }
+                }
+            });
+
+            return { byDay, allRows };
+        }
+
+        function extractAttendanceRecordsFromHtml(htmlString, isTodayRequest = false, expectedDdMmYyyy = '') {
+            const doc = parseHtmlDocument(htmlString);
+
+            const containerSelector = isTodayRequest
+                ? '#MCPH1_SCPH_todayatt'
+                : '#MCPH1_SCPH_DateWiseAtt';
+
+            const tableSelector = isTodayRequest
+                ? '#MCPH1_SCPH_gvDailyAttendence1'
+                : '#MCPH1_SCPH_gvDateWise';
+
+            const container = doc.querySelector(containerSelector);
+            if (container && container.style && container.style.display === 'none') {
+                return { status: 'NO_RECORD', records: [] };
+            }
+
+            const table = doc.querySelector(tableSelector);
+            if (!table) {
+                if (doc.querySelector('#MCPH1_SCPH_todayatt, #MCPH1_SCPH_DateWiseAtt, #form1')) {
+                    return { status: 'NO_RECORD', records: [] };
+                }
+                return { status: 'ERROR', error: 'Unexpected response from attendance server.' };
+            }
+
+            const trs = Array.from(table.querySelectorAll('tr'));
+            const records = [];
+
+            for (let i = 0; i < trs.length; i++) {
+                const tr = trs[i];
+                if (tr.classList.contains('top-heading') || tr.querySelector('th')) continue;
+
+                const rowText = cleanText(tr.textContent);
+                if (/no record found/i.test(rowText)) {
+                    return { status: 'NO_RECORD', records: [] };
+                }
+
+                const rowDate = cleanText(tr.querySelector('span[id*="lblDate"]')?.textContent);
+                if (expectedDdMmYyyy && rowDate && rowDate !== expectedDdMmYyyy) {
+                    continue;
+                }
+
+                const tds = tr.querySelectorAll('td');
+                const lastFourTds = tds.length >= 4 ? Array.from(tds).slice(-4) : [];
+
+                const rawSubject = cleanText(
+                    tr.querySelector('span[id*="lblNAME"]')?.textContent ??
+                    lastFourTds[0]?.textContent
+                );
+                const rawTimeSlot = cleanText(
+                    tr.querySelector('span[id*="lblTimeSlot"]')?.textContent ??
+                    lastFourTds[1]?.textContent
+                );
+                const rawAttType = cleanText(
+                    tr.querySelector('span[id*="lblAttType"]')?.textContent ??
+                    lastFourTds[2]?.textContent
+                );
+                const statusSpan = tr.querySelector('span[id*="lblProgram"], span[id*="lblStatus"]');
+                const rawStatusText = cleanText(
+                    statusSpan ? statusSpan.textContent : lastFourTds[3]?.textContent
+                );
+
+                if (rawSubject || rawTimeSlot) {
+                    const normStatus = normalizeAttendanceStatus(rawStatusText);
+                    records.push({
+                        subject: rawSubject || '-',
+                        rawSubject: rawSubject || '-',
+                        time: convertTo12Hour(rawTimeSlot),
+                        rawTimeSlot: rawTimeSlot || '-',
+                        type: attendanceLabel(rawAttType),
+                        _rawStatus: normStatus || 'NM'
+                    });
+                }
+            }
+
+            if (records.length === 0) {
+                return { status: 'NO_RECORD', records: [] };
+            }
+            return { status: 'FOUND', records };
+        }
+
+        function mergeAttendanceWithTimetable(attendanceRows, weeklyTimetable, isoDateStr) {
+            const dayName = getDayNameFromIso(isoDateStr);
+            const dayTimetable = (weeklyTimetable && weeklyTimetable.byDay && weeklyTimetable.byDay[dayName] && weeklyTimetable.byDay[dayName].length > 0)
+                ? weeklyTimetable.byDay[dayName]
+                : [];
+
+            const allSubjectLookup = new Map();
+            if (weeklyTimetable && weeklyTimetable.allRows) {
+                weeklyTimetable.allRows.forEach(item => {
+                    const norm = normalizeSubject(item.subject);
+                    if (norm && !allSubjectLookup.has(norm)) {
+                        allSubjectLookup.set(norm, item);
+                    }
+                });
+            }
+
+            if (dayTimetable.length === 0) {
+                return attendanceRows.map(r => {
+                    const norm = normalizeSubject(r.rawSubject || r.subject);
+                    const meta = allSubjectLookup.get(norm);
+                    return {
+                        rawSubject: r.rawSubject || r.subject,
+                        code: meta ? meta.subjectCode : '',
+                        type: r.type && r.type !== '-' ? r.type : inferSubjectType(r.rawSubject, meta?.subjectCode),
+                        time: r.time || convertTo12Hour(r.rawTimeSlot),
+                        rawTimeSlot: r.rawTimeSlot || r.time,
+                        _rawStatus: r._rawStatus || 'NM'
+                    };
+                });
+            }
+
+            const attByTime = new Map();
+            for (const row of attendanceRows) {
+                const timeKey = normalizeTime(row.rawTimeSlot || row.time);
+                if (!attByTime.has(timeKey)) attByTime.set(timeKey, []);
+                attByTime.get(timeKey).push(row);
+            }
+
+            const usedAttRows = new Set();
+            const merged = dayTimetable.map(ttRow => {
+                const timeKey = normalizeTime(ttRow.timeSlot);
+                const candidates = (attByTime.get(timeKey) || []).filter(c => !usedAttRows.has(c));
+                const ranked = candidates
+                    .map(candidate => ({ candidate, score: similarity(ttRow.subject, candidate.rawSubject || candidate.subject) }))
+                    .sort((a, b) => b.score - a.score);
+
+                const best = ranked[0];
+                const second = ranked[1];
+                const isAmbiguous = best && second && Math.abs(best.score - second.score) < 0.03;
+
+                if (!best || best.score < 0.70 || isAmbiguous) {
+                    return {
+                        rawSubject: ttRow.subject,
+                        code: ttRow.subjectCode || '',
+                        type: inferSubjectType(ttRow.subject, ttRow.subjectCode),
+                        time: convertTo12Hour(ttRow.timeSlot),
+                        rawTimeSlot: ttRow.timeSlot,
+                        _rawStatus: 'NM'
+                    };
+                }
+
+                usedAttRows.add(best.candidate);
+                return {
+                    rawSubject: ttRow.subject,
+                    code: ttRow.subjectCode || '',
+                    type: best.candidate.type && best.candidate.type !== '-' ? best.candidate.type : inferSubjectType(ttRow.subject, ttRow.subjectCode),
+                    time: convertTo12Hour(ttRow.timeSlot),
+                    rawTimeSlot: ttRow.timeSlot,
+                    _rawStatus: best.candidate._rawStatus || 'NM'
+                };
+            });
+
+            for (const leftover of attendanceRows) {
+                if (!usedAttRows.has(leftover)) {
+                    let bestMeta = null;
+                    let bestScore = 0;
+                    if (weeklyTimetable && weeklyTimetable.allRows) {
+                        for (const item of weeklyTimetable.allRows) {
+                            const s = similarity(item.subject, leftover.rawSubject || leftover.subject);
+                            if (s > bestScore) {
+                                bestScore = s;
+                                bestMeta = item;
+                            }
+                        }
+                    }
+                    const code = bestScore >= 0.70 && bestMeta ? bestMeta.subjectCode : '';
+                    merged.push({
+                        rawSubject: leftover.rawSubject || leftover.subject,
+                        code: code,
+                        type: leftover.type && leftover.type !== '-' ? leftover.type : inferSubjectType(leftover.rawSubject, code),
+                        time: leftover.time || convertTo12Hour(leftover.rawTimeSlot),
+                        rawTimeSlot: leftover.rawTimeSlot || leftover.time,
+                        _rawStatus: leftover._rawStatus || 'NM'
+                    });
+                }
+            }
+
+            return merged;
+        }
+
+        function parseGaugeAttendanceHtmlOnFrontend(type, htmlString) {
+            const doc = parseHtmlDocument(htmlString);
+            const results = [];
+            if (type === 'monthly') {
+                doc.querySelectorAll('#MCPH1_SCPH_gvMonthly tr').forEach((tr, i) => {
+                    if (i === 0) return;
+                    const month = cleanText(tr.querySelector('span[id*="lblMonthYear"]')?.textContent);
+                    const percentage = cleanText(tr.querySelector('span[id*="lblPercentage"]')?.textContent);
+                    if (month) results.push({ label: month, value: percentage });
+                });
+            } else if (type === 'semester') {
+                doc.querySelectorAll('#MCPH1_SCPH_gvAttendanceDetail tr').forEach((tr, i) => {
+                    if (i === 0) return;
+                    const sem = cleanText(tr.querySelector('span[id*="lblSubjectName8"]')?.textContent);
+                    const percentage = cleanText(tr.querySelector('span[id*="lblPercentage"]')?.textContent);
+                    if (sem) results.push({ label: sem, value: percentage });
+                });
+            } else if (type === 'subject') {
+                doc.querySelectorAll('#MCPH1_SCPH_GVSubject tr').forEach((tr, i) => {
+                    if (i === 0) return;
+                    const rawSubject = cleanText(tr.querySelector('span[id*="lblSubject_"]')?.textContent);
+                    const semester = cleanText(tr.querySelector('span[id*="lblSubjectName8_"]')?.textContent);
+                    const session = cleanText(tr.querySelector('span[id*="lblSessionName_"]')?.textContent);
+                    const course = cleanText(tr.querySelector('span[id*="lblCourse_"]')?.textContent);
+                    const percentage = cleanText(tr.querySelector('span[id*="lblPercentage_"]')?.textContent);
+                    if (rawSubject) results.push({ label: rawSubject, value: percentage, semester, session, course });
+                });
+            }
+            return results;
+        }
+
+        async function fetchWithRetry(url, options, retries = 1, timeoutMs = 20000) {
+            let lastErr = null;
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                const controller = new AbortController();
+                activeSearchAbortController = controller;
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(timer);
+                    if (activeSearchAbortController === controller) activeSearchAbortController = null;
+                    return res;
+                } catch (err) {
+                    clearTimeout(timer);
+                    if (activeSearchAbortController === controller) activeSearchAbortController = null;
+                    if (!searchInFlight && err.name === 'AbortError') {
+                        const abortErr = new Error('SEARCH_STOPPED');
+                        abortErr.code = 'SEARCH_STOPPED';
+                        throw abortErr;
+                    }
+                    lastErr = err;
+                    if (attempt < retries) {
+                        await new Promise(r => setTimeout(r, 350));
+                    }
+                }
+            }
+            throw lastErr || new Error('Network error');
+        }
+
+        async function ensureWeeklyTimetableLoaded() {
+            if (cachedWeeklyTimetable) return cachedWeeklyTimetable;
+            try {
+                const res = await fetchWithRetry(`${API_BASE}/timetable/weekly`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                }, 1, 20000);
+                if (res.status === 401) {
+                    const err = new Error('SESSION_EXPIRED');
+                    err.code = 'SESSION_EXPIRED';
+                    throw err;
+                }
+                const data = await res.json();
+                if (res.ok && data.success && data.html) {
+                    const parsed = parseWeeklyTimetableHtml(data.html);
+                    if (parsed) cachedWeeklyTimetable = parsed;
+                }
+            } catch (err) {
+                if (err.code === 'SESSION_EXPIRED' || err.code === 'SEARCH_STOPPED') throw err;
+            }
+            return cachedWeeklyTimetable;
+        }
+
+        async function fetchDateOrTodayAttendance(isoDateStr) {
+            if (dateAttendanceCache.has(isoDateStr)) {
+                return dateAttendanceCache.get(isoDateStr);
+            }
+
+            const formattedDate = formatIsoToDdMmYyyy(isoDateStr);
+
+            const res = await fetchWithRetry(`${API_BASE}/attendance/datewise`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, date: formattedDate })
+            }, 1, 20000);
+
+            if (res.status === 401) {
+                const err = new Error('SESSION_EXPIRED');
+                err.code = 'SESSION_EXPIRED';
+                throw err;
+            }
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                if (data.error && data.error.toLowerCase().includes('session')) {
+                    const err = new Error('SESSION_EXPIRED');
+                    err.code = 'SESSION_EXPIRED';
+                    throw err;
+                }
+                throw new Error(data.error || 'Failed to fetch attendance.');
+            }
+
+            const parsed = extractAttendanceRecordsFromHtml(data.html, false, formattedDate);
+            if (parsed.status === 'ERROR') {
+                throw new Error(parsed.error);
+            }
+
+            if (parsed.status === 'FOUND') {
+                const timetable = await ensureWeeklyTimetableLoaded();
+                parsed.records = mergeAttendanceWithTimetable(parsed.records, timetable, isoDateStr);
+            }
+
+            dateAttendanceCache.set(isoDateStr, parsed);
+            return parsed;
+        }
+
+        function stopAttendanceSearch() {
+            if (!searchInFlight) return;
+            searchInFlight = false;
+            searchDirection = 0;
+            attendanceRequestId++;
+            if (activeSearchAbortController) {
+                try { activeSearchAbortController.abort(); } catch (_) {}
+                activeSearchAbortController = null;
+            }
+            updateDateNavigationUI();
+            document.getElementById('attLoading').classList.add('hidden');
+            document.getElementById('attTableContainer').classList.remove('hidden');
+
+            const cached = dateAttendanceCache.get(currentSelectedDate);
+            const formatted = formatIsoToDdMmYyyy(currentSelectedDate);
+            renderAttendanceTable('today', cached ? cached.records : [], formatted, isSundayIso(currentSelectedDate));
+        }
+
+        function navigateDate(direction) {
+            if (searchInFlight) {
+                stopAttendanceSearch();
+                return;
+            }
+            searchValidAttendanceDate(direction < 0 ? -1 : 1);
+        }
+
+        function handleCustomDateSelect(value) {
+            if (searchInFlight) stopAttendanceSearch();
+            if (!value) return;
+            const todayIso = getTodayIsoDate();
+            const chosen = value > todayIso ? todayIso : value;
+            currentSelectedDate = chosen;
+            updateDateNavigationUI();
+            executeSingleDateAttendance(currentSelectedDate);
+        }
+
+        async function executeSingleDateAttendance(isoDateStr) {
+            const requestId = ++attendanceRequestId;
+            attendanceLoaded = false;
+            updateDateNavigationUI();
+
+            const formattedDate = formatIsoToDdMmYyyy(isoDateStr);
+
+            if (isSundayIso(isoDateStr)) {
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                attendanceLoaded = true;
+                attendanceLoadedType = 'today';
+                attendanceLoadedAt = Date.now();
+                renderAttendanceTable('today', [], formattedDate, true);
+                return;
+            }
+
+            document.getElementById('attTableContainer').classList.add('hidden');
+            document.getElementById('todaySummaryBox').classList.add('hidden');
+            const isToday = isoDateStr === getTodayIsoDate();
+            setLoadingProgress(
+                isToday ? `Loading Today's Attendance (${formattedDate})...` : `Checking attendance for ${formattedDate}...`,
+                formattedDate,
+                'Fetching attendance records from server...'
+            );
+
+            try {
+                const parsedAtt = await fetchDateOrTodayAttendance(isoDateStr);
+                if (requestId !== attendanceRequestId) return;
+
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+
+                attendanceLoaded = true;
+                attendanceLoadedType = 'today';
+                attendanceLoadedAt = Date.now();
+                renderAttendanceTable('today', parsedAtt.records, formattedDate, false);
+            } catch (err) {
+                if (requestId !== attendanceRequestId) return;
+                if (err.code === 'SESSION_EXPIRED') {
+                    return showSessionExpiredUI(document.getElementById('attTbody'), true);
+                }
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                document.getElementById('attThead').innerHTML = '';
+                document.getElementById('attTbody').innerHTML = `<tr><td colspan="3" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">${escapeHtml(err.message || 'Network disconnected.')}</td></tr>`;
+            }
+        }
+
+        async function searchValidAttendanceDate(direction) {
+            if (searchInFlight) return;
+            const todayIso = getTodayIsoDate();
+            if (direction > 0 && currentSelectedDate >= todayIso) return;
+
+            searchInFlight = true;
+            searchDirection = direction < 0 ? -1 : 1;
+            const requestId = ++attendanceRequestId;
+            const originalSelectedDate = currentSelectedDate;
+            updateDateNavigationUI();
+
+            document.getElementById('attTableContainer').classList.add('hidden');
+            document.getElementById('todaySummaryBox').classList.add('hidden');
+            setLoadingProgress(
+                direction < 0 ? 'Searching previous attendance...' : 'Searching next attendance...',
+                formatIsoToDdMmYyyy(originalSelectedDate),
+                'Tap Stop anytime to cancel search.'
+            );
+
+            let candidateObj = parseIsoDateLocal(originalSelectedDate);
+            const maxDaysSearch = 60;
+            let daysChecked = 0;
+
+            try {
+                while (daysChecked < maxDaysSearch && searchInFlight) {
+                    if (requestId !== attendanceRequestId) return;
+
+                    candidateObj.setDate(candidateObj.getDate() + direction);
+                    daysChecked++;
+                    const candidateIso = toIsoDateLocal(candidateObj);
+                    const candidateFormatted = formatIsoToDdMmYyyy(candidateIso);
+
+                    if (direction > 0 && candidateIso > todayIso) {
+                        currentSelectedDate = todayIso;
+                        searchInFlight = false;
+                        searchDirection = 0;
+                        updateDateNavigationUI();
+                        const todayAtt = await fetchDateOrTodayAttendance(todayIso);
+                        if (requestId !== attendanceRequestId) return;
+                        document.getElementById('attLoading').classList.add('hidden');
+                        document.getElementById('attTableContainer').classList.remove('hidden');
+                        attendanceLoaded = true;
+                        attendanceLoadedType = 'today';
+                        attendanceLoadedAt = Date.now();
+                        renderAttendanceTable('today', todayAtt.records, formatIsoToDdMmYyyy(todayIso), isSundayIso(todayIso));
+                        return;
+                    }
+
+                    if (candidateObj.getDay() === 0) {
+                        setLoadingProgress('Sunday detected. Skipping date...', candidateFormatted, 'Tap Stop anytime to cancel search.');
+                        await new Promise(r => setTimeout(r, 120));
+                        continue;
+                    }
+
+                    currentSelectedDate = candidateIso;
+                    updateDateNavigationUI();
+                    setLoadingProgress(`Checking attendance for ${candidateFormatted}...`, candidateFormatted, 'Tap Stop anytime to cancel search.');
+
+                    const parsedAtt = await fetchDateOrTodayAttendance(candidateIso);
+                    if (!searchInFlight || requestId !== attendanceRequestId) return;
+
+                    if (parsedAtt.status === 'NO_RECORD') {
+                        if (direction > 0 && candidateIso >= todayIso) {
+                            searchInFlight = false;
+                            searchDirection = 0;
+                            updateDateNavigationUI();
+                            document.getElementById('attLoading').classList.add('hidden');
+                            document.getElementById('attTableContainer').classList.remove('hidden');
+                            attendanceLoaded = true;
+                            attendanceLoadedType = 'today';
+                            attendanceLoadedAt = Date.now();
+                            renderAttendanceTable('today', [], candidateFormatted, false);
+                            return;
+                        }
+                        setLoadingProgress(
+                            'No attendance record found. Skipping date...',
+                            candidateFormatted,
+                            `No record on ${candidateFormatted}. Checking ${direction < 0 ? 'previous' : 'next'} date...`
+                        );
+                        await new Promise(r => setTimeout(r, 100));
+                        continue;
+                    }
+
+                    if (parsedAtt.status === 'FOUND') {
+                        setLoadingProgress(`Attendance found for ${candidateFormatted}!`, candidateFormatted, 'Generating attendance table...');
+                        searchInFlight = false;
+                        searchDirection = 0;
+                        updateDateNavigationUI();
+
+                        document.getElementById('attLoading').classList.add('hidden');
+                        document.getElementById('attTableContainer').classList.remove('hidden');
+
+                        attendanceLoaded = true;
+                        attendanceLoadedType = 'today';
+                        attendanceLoadedAt = Date.now();
+                        renderAttendanceTable('today', parsedAtt.records, candidateFormatted, false);
+                        return;
+                    }
+                }
+
+                if (!searchInFlight) return;
+                currentSelectedDate = originalSelectedDate;
+                searchInFlight = false;
+                searchDirection = 0;
+                updateDateNavigationUI();
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                renderAttendanceTable('today', [], formatIsoToDdMmYyyy(originalSelectedDate), isSundayIso(originalSelectedDate));
+            } catch (err) {
+                if (err.code === 'SEARCH_STOPPED' || !searchInFlight) return;
+                currentSelectedDate = originalSelectedDate;
+                searchInFlight = false;
+                searchDirection = 0;
+                updateDateNavigationUI();
+                if (requestId !== attendanceRequestId) return;
+                if (err.code === 'SESSION_EXPIRED') {
+                    return showSessionExpiredUI(document.getElementById('attTbody'), true);
+                }
+                document.getElementById('attLoading').classList.add('hidden');
+                document.getElementById('attTableContainer').classList.remove('hidden');
+                document.getElementById('attThead').innerHTML = '';
+                document.getElementById('attTbody').innerHTML = `<tr><td colspan="3" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">${escapeHtml(err.message || 'Attendance search interrupted due to an error.')}</td></tr>`;
+            }
+        }
 
         function safeImageUrl(value) {
             try {
@@ -492,7 +1626,7 @@
             `;
             if(isTable) {
                 document.getElementById('attThead').innerHTML = '';
-                containerElement.innerHTML = `<tr><td colspan="4">${expiredHTML}</td></tr>`;
+                containerElement.innerHTML = `<tr><td colspan="3">${expiredHTML}</td></tr>`;
                 document.getElementById('attTableContainer').classList.remove('hidden');
                 document.getElementById('attLoading').classList.add('hidden');
                 document.getElementById('todaySummaryBox').classList.add('hidden');
@@ -555,6 +1689,7 @@
         }
 
         function switchMainTab(viewId, btn, updateRoute = true) {
+            if (searchInFlight) stopAttendanceSearch();
             currentView = viewId;
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(viewId)?.classList.remove('hidden');
@@ -588,6 +1723,7 @@
         }
 
         async function logoutPortal() {
+            if (searchInFlight) stopAttendanceSearch();
             if (sessionId) {
                 try {
                     await fetch(`${API_BASE}/logout`, {
@@ -603,6 +1739,10 @@
             profileLoaded = false;
             attendanceLoaded = false;
             attendanceLoadedType = null;
+            cachedWeeklyTimetable = null;
+            dateAttendanceCache.clear();
+            searchInFlight = false;
+            searchDirection = 0;
             profileRequestId++;
             attendanceRequestId++;
             currentProfilePhoto = null;
@@ -679,6 +1819,9 @@
         }
 
         async function restoreSessionFromUrl() {
+            currentSelectedDate = getTodayIsoDate();
+            updateDateNavigationUI();
+
             if (!sessionId) {
                 applyRouteFromLocation();
                 initSession();
@@ -717,7 +1860,6 @@
                     applyRouteFromLocation();
                     initSession();
                 } else {
-                    console.warn("Network Error: Offline hone ke kaaran last session ko active rakha gaya hai.");
                     applyRouteFromLocation();
                 }
             } finally {
@@ -761,13 +1903,16 @@
                 const data = await res.json();
                 if (data.success) {
                     localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+                    cachedWeeklyTimetable = null;
+                    dateAttendanceCache.clear();
+                    currentSelectedDate = getTodayIsoDate();
+                    updateDateNavigationUI();
                     showDashboardView();
                     
                     fetchProfile(true);
                     
                     currentAttType = 'today';
                     setPageRoute('today');
-                    currentAttType = 'today';
                     attendanceLoaded = false;
                     attendanceLoadedType = null;
                     switchMainTab('view-attendance', document.getElementById('tabBtnAttendance'), false);
@@ -823,7 +1968,7 @@
                 }
 
                 if (data.success) {
-                    const p = data.data;
+                    const p = data.html ? parseProfileHtmlOnFrontend(data.html) : data.data;
                     const elProfName = document.getElementById('profName');
                     const elProfAdm = document.getElementById('profAdm');
                     if(elProfName) elProfName.innerText = p.headerName || '-';
@@ -897,7 +2042,6 @@
                 }
             } catch(e) { 
                 if (requestId !== profileRequestId) return;
-                console.error("Profile load error:", e); 
                 document.getElementById('dynamicProfileContainer').innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444; font-weight: 600;">Error: Failed to process profile.</div>`;
                 if (topAvatar) topAvatar.innerHTML = defaultProfileSvg;
                 if (topName) topName.innerText = 'Student';
@@ -921,9 +2065,11 @@
         }
 
         function showDateFilters(type, btn, updateRoute = true, autoLoadSaved = true) {
+            if (searchInFlight) stopAttendanceSearch();
             currentAttType = 'subject';
             if (updateRoute) setPageRoute('subject');
             syncAttendanceTabButtons('subject');
+            document.getElementById('dateWiseNavBlock').classList.add('hidden');
             document.getElementById('dateFilters').classList.remove('hidden');
             document.getElementById('todaySummaryBox').classList.add('hidden');
             const saved = readSubjectDates();
@@ -957,16 +2103,28 @@
         }
 
         function loadAttendance(type, btn, updateRoute = true) {
+            if (searchInFlight) stopAttendanceSearch();
             if (type === 'subject') return showDateFilters('subject', btn, updateRoute, true);
             if (updateRoute) setPageRoute(type);
             syncAttendanceTabButtons(type);
             document.getElementById('dateFilters').classList.add('hidden');
+            document.getElementById('dateWiseNavBlock').classList.toggle('hidden', type !== 'today');
             document.getElementById('todaySummaryBox').classList.toggle('hidden', type !== 'today');
             currentAttType = type;
-            executeAttendanceFetch(type);
+
+            if (type === 'today') {
+                if (!currentSelectedDate) currentSelectedDate = getTodayIsoDate();
+                updateDateNavigationUI();
+                executeSingleDateAttendance(currentSelectedDate);
+            } else {
+                executeAttendanceFetch(type);
+            }
         }
 
         async function executeAttendanceFetch(type, fromDate = null, toDate = null) {
+            if (type === 'today') {
+                return executeSingleDateAttendance(currentSelectedDate);
+            }
             if (type === 'subject') {
                 const saved = readSubjectDates();
                 fromDate = fromDate || document.getElementById('dateFrom').value || saved.from;
@@ -981,7 +2139,7 @@
             attendanceLoaded = false;
             document.getElementById('attTableContainer').classList.add('hidden');
             document.getElementById('todaySummaryBox').classList.add('hidden');
-            document.getElementById('attLoading').classList.remove('hidden');
+            setLoadingProgress('Synchronizing Data...', null, 'Fetching attendance analytics from portal...');
 
             try {
                 const res = await fetch(`${API_BASE}/attendance/${type}`, {
@@ -1006,15 +2164,16 @@
                     attendanceLoaded = true;
                     attendanceLoadedType = type;
                     attendanceLoadedAt = Date.now();
-                    renderAttendanceTable(type, response.data);
+                    const parsedData = response.html ? parseGaugeAttendanceHtmlOnFrontend(type, response.html) : response.data;
+                    renderAttendanceTable(type, parsedData);
                 } else {
-                    document.getElementById('attTbody').innerHTML = `<tr><td colspan="4" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">${escapeHtml(response.error || 'Failed to fetch records.')}</td></tr>`;
+                    document.getElementById('attTbody').innerHTML = `<tr><td colspan="3" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">${escapeHtml(response.error || 'Failed to fetch records.')}</td></tr>`;
                 }
             } catch(e) {
                 if (requestId !== attendanceRequestId) return;
                 document.getElementById('attLoading').classList.add('hidden');
                 document.getElementById('attTableContainer').classList.remove('hidden');
-                document.getElementById('attTbody').innerHTML = `<tr><td colspan="4" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">Network disconnected.</td></tr>`;
+                document.getElementById('attTbody').innerHTML = `<tr><td colspan="3" style="color:#ef4444;font-weight:600;text-align:center;padding:30px;">Network disconnected.</td></tr>`;
             }
         }
 
@@ -1023,10 +2182,11 @@
         }
 
         function getStatusBadge(status) {
-            const code = String(status || '').toUpperCase();
+            const code = normalizeAttendanceStatus(status);
             const labels = { P: 'Present', A: 'Absent', NM: 'Not Mentioned' };
             const cls = code === 'P' ? 'badge-present' : code === 'A' ? 'badge-absent' : code === 'NM' ? 'badge-nm' : 'badge-default';
-            return `<button type="button" class="badge status-badge ${cls}" data-tooltip="${labels[code] || escapeHtml(status || 'Status unavailable')}" aria-label="${labels[code] || escapeHtml(status || 'Status unavailable')}">${escapeHtml(code || '-')}</button>`;
+            const display = code || '-';
+            return `<button type="button" class="badge status-badge ${cls}" data-tooltip="${labels[code] || escapeHtml(status || 'Status unavailable')}" aria-label="${labels[code] || escapeHtml(status || 'Status unavailable')}">${escapeHtml(display)}</button>`;
         }
 
         function getProgressBarColor(num) {
@@ -1037,7 +2197,7 @@
             return '#ef4444'; 
         }
 
-        function renderAttendanceTable(type, data) {
+        function renderAttendanceTable(type, data, dateLabel = null, isSunday = false) {
             const head = document.getElementById('attThead');
             const body = document.getElementById('attTbody');
             const table = head.closest('table');
@@ -1049,31 +2209,68 @@
 
             if (!data || data.length === 0) {
                 head.innerHTML = '';
-                body.innerHTML = '<tr><td colspan="4" style="padding: 40px; text-align:center; color: var(--text-muted); font-weight:500; font-size: 16px;">No records found for this selection.</td></tr>';
+                if (type === 'today') {
+                    document.getElementById('todaySummaryBox').classList.add('hidden');
+                    const msg = isSunday
+                        ? `Sunday (${escapeHtml(dateLabel || '')}) — Weekly Off. No classes scheduled.`
+                        : (dateLabel ? `No attendance records found for ${escapeHtml(dateLabel)}.` : 'No records found for this selection.');
+                    body.innerHTML = `<tr><td colspan="3" style="padding: 40px; text-align:center; color: var(--text-muted); font-weight:600; font-size: 16px;">${msg}</td></tr>`;
+                } else {
+                    body.innerHTML = '<tr><td colspan="3" style="padding: 40px; text-align:center; color: var(--text-muted); font-weight:500; font-size: 16px;">No records found for this selection.</td></tr>';
+                }
                 return;
             }
 
             if (type === 'today') {
-                head.innerHTML = `<tr><th style="width:38%">Subject</th><th style="width:22%">Faculty</th><th style="width:24%">Time</th><th style="width:16%">Status</th></tr>`;
+                head.innerHTML = `<tr><th style="width:52%">Subject</th><th style="width:30%">Time</th><th style="width:18%">Status</th></tr>`;
                 let present = 0, absent = 0, nm = 0;
 
+                const statusPriority = { P: 3, A: 2, NM: 1 };
+                const uniqueByTime = new Map();
+
                 data.forEach(r => {
-                    if (r._rawStatus === 'P') present++;
-                    else if (r._rawStatus === 'A') absent++;
-                    else if (r._rawStatus === 'NM') nm++;
+                    const timeKey = normalizeTime(r.rawTimeSlot || r.time);
+                    const statusCode = normalizeAttendanceStatus(r._rawStatus || r.status) || 'NM';
+                    const rank = statusPriority[statusCode] || 0;
+
+                    if (!uniqueByTime.has(timeKey)) {
+                        uniqueByTime.set(timeKey, { row: r, rank, timeKey });
+                    } else {
+                        const existing = uniqueByTime.get(timeKey);
+                        if (rank > existing.rank) {
+                            uniqueByTime.set(timeKey, { row: r, rank, timeKey });
+                        }
+                    }
+                });
+
+                const sortedRows = Array.from(uniqueByTime.values())
+                    .sort((a, b) => {
+                        const aStart = parseInt(String(a.timeKey).split('-')[0], 10);
+                        const bStart = parseInt(String(b.timeKey).split('-')[0], 10);
+                        if (!Number.isNaN(aStart) && !Number.isNaN(bStart) && aStart !== bStart) {
+                            return aStart - bStart;
+                        }
+                        return String(a.timeKey).localeCompare(String(b.timeKey));
+                    })
+                    .map(item => item.row);
+
+                sortedRows.forEach(r => {
+                    const statusCode = normalizeAttendanceStatus(r._rawStatus || r.status) || 'NM';
+                    if (statusCode === 'P') present++;
+                    else if (statusCode === 'A') absent++;
+                    else if (statusCode === 'NM') nm++;
 
                     const subjectType = r.type && r.type !== '-' ? String(r.type) : '';
                     let formattedTime = r.time || '-';
                     formattedTime = formattedTime.replace(/(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*\2/i, '$1 - $3 $2');
                     
                     html += `<tr>
-                        <td><div class="subject-cell">
+                        <td style="width:52%"><div class="subject-cell">
                             <div class="today-subject-title">${escapeHtml(r.rawSubject || r.subject)}</div>
                             <div class="today-subject-meta">${r.code ? `<span>(${escapeHtml(r.code)})</span>` : ''}${subjectType ? `<span>(${escapeHtml(subjectType)})</span>` : ''}</div>
                         </div></td>
-                        <td>${escapeHtml(r.faculty || '-')}</td>
-                        <td><span style="white-space: nowrap;">${escapeHtml(formattedTime)}</span></td>
-                        <td>${getStatusBadge(r._rawStatus)}</td>
+                        <td style="width:30%"><span style="white-space: nowrap;">${escapeHtml(formattedTime)}</span></td>
+                        <td style="width:18%">${getStatusBadge(statusCode)}</td>
                     </tr>`;
                 });
 
@@ -1082,7 +2279,7 @@
                 const aPct = total ? ((absent / total) * 100).toFixed(1) : 0;
                 const nmPct = total ? ((nm / total) * 100).toFixed(1) : 0;
 
-                document.getElementById('todayStatRatio').innerText = `${present}/${total} Classes Marked Present`;
+                document.getElementById('todayStatRatio').innerText = `${present}/${total} Classes Present`;
                 
                 document.getElementById('summaryBarTrack').innerHTML = `
                     <div class="summary-segment seg-present" style="width: 0%;" data-width="${pPct}%"></div>
