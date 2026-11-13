@@ -89,6 +89,7 @@ function mergeCookies(oldCookies = '', newCookieHeaders = []) {
 
 function formatDateForDotNet(dateStr) {
     if (!dateStr) return '';
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
     const [y, m, d] = dateStr.split('-');
     return `${d}/${m}/${y}`;
 }
@@ -97,98 +98,9 @@ function cleanText(value) {
     return String(value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function timeToMinutes(token) {
-    const match = cleanText(token).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-    if (!match) return null;
-    let hour = Number(match[1]);
-    const minute = Number(match[2]);
-    const period = (match[3] || '').toUpperCase();
-    if (minute > 59 || hour > 24) return null;
-    if (period) {
-        if (hour > 12 && hour <= 23) hour %= 12;
-        if (hour === 12 && period === 'AM') hour = 0;
-        else if (hour < 12 && period === 'PM') hour += 12;
-        else if (hour === 12 && period === 'PM') hour = 12;
-    } else if (hour === 24) {
-        hour = 0;
-    }
-    return hour * 60 + minute;
-}
-
-function normalizeTime(value) {
-    const cleaned = cleanText(value).replace(/\(P\d+\)/gi, '');
-    const parts = cleaned.split(/\s*[-–—]\s*/);
-    if (parts.length !== 2) return cleaned.replace(/\s+/g, '').toUpperCase();
-    const start = timeToMinutes(parts[0]);
-    const end = timeToMinutes(parts[1]);
-    return start !== null && end !== null ? `${start}-${end}` : cleaned.replace(/\s+/g, '').toUpperCase();
-}
-
-function normalizeSubject(subject) {
-    return String(subject || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "");
-}
-
-function levenshtein(a, b) {
-    if (a === b) return 0;
-    if (!a.length) return b.length;
-    if (!b.length) return a.length;
-    if (Math.abs(a.length - b.length) > Math.max(a.length, b.length) * 0.75) return Math.max(a.length, b.length);
-
-    let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
-    for (let i = 1; i <= a.length; i++) {
-        const current = [i];
-        for (let j = 1; j <= b.length; j++) {
-            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-            current[j] = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
-        }
-        previous = current;
-    }
-    return previous[b.length];
-}
-
-function similarity(a, b) {
-    a = normalizeSubject(a);
-    b = normalizeSubject(b);
-    if (!a || !b) return 0;
-    if (a === b) return 1;
-    return 1 - (levenshtein(a, b) / Math.max(a.length, b.length));
-}
-
-function convertTo12Hour(timeSlot) {
-    return cleanText(timeSlot)
-        .replace(/\(P\d+\)\s*/gi, '')
-        .replace(/(\d{1,2}):(\d{2})\s*(AM|PM)/gi, (_, h, m, period) => {
-            let hour = parseInt(h, 10);
-            period = period.toUpperCase();
-            if (hour > 12) {
-                hour = hour % 12;
-                period = 'PM';
-            } else if (hour === 0) {
-                hour = 12;
-                period = 'AM';
-            }
-            return `${String(hour).padStart(2, '0')}:${m} ${period}`;
-        })
-        .replace(/\s*[-–—]\s*/g, ' - ');
-}
-
-function attendanceLabel(value) {
-    const code = cleanText(value).toUpperCase();
-    return ({ L: 'Lecture', T: 'Tutorial', P: 'LAB' })[code] || code || '-';
-}
-
-function statusLabel(value) {
-    return ({ P: 'Present', A: 'Absent', NM: 'Not Mention' })[cleanText(value).toUpperCase()] || cleanText(value) || '-';
-}
-
-function getCellText($, cell) {
-    return cleanText($(cell).text());
-}
-
 function isPortalLoginPage(html) {
     if (typeof html !== 'string') return false;
-    const $ = cheerio.load(html);
-    return $('input[name="__txtUserId100"], input[name="txtPass"], #__txtUserId100').length > 0;
+    return /__txtUserId100|txtPass/.test(html);
 }
 
 function sessionExpiredError() {
@@ -197,14 +109,8 @@ function sessionExpiredError() {
     return error;
 }
 
-async function fetchAttendancePostback(session, buttonName, buttonValue, extraFields = {}) {
-    const getRes = await axios.get(ATTENDANCE_URL, {
-        headers: { Cookie: session.cookies, 'User-Agent': 'Mozilla/5.0' },
-        validateStatus: status => status >= 200 && status < 400
-    });
-    session.cookies = mergeCookies(session.cookies, getRes.headers['set-cookie']);
-    if (isPortalLoginPage(getRes.data)) throw sessionExpiredError();
-    const $page = cheerio.load(getRes.data);
+function extractFormPayload(html, buttonName, buttonValue, extraFields = {}) {
+    const $page = cheerio.load(html);
     const form = $page('form').first();
     const payload = new URLSearchParams();
 
@@ -219,9 +125,53 @@ async function fetchAttendancePostback(session, buttonName, buttonValue, extraFi
     });
 
     for (const [key, value] of Object.entries(extraFields)) payload.set(key, value);
-    payload.set(buttonName, buttonValue);
+    if (buttonName) payload.set(buttonName, buttonValue);
+    return payload;
+}
 
-    const postRes = await axios.post(ATTENDANCE_URL, payload.toString(), {
+async function fetchAttendancePageHtml(session) {
+    const res = await axios.get(ATTENDANCE_URL, {
+        headers: { Cookie: session.cookies, Referer: HOME_URL, 'User-Agent': 'Mozilla/5.0' },
+        validateStatus: status => status >= 200 && status < 400
+    });
+    session.cookies = mergeCookies(session.cookies, res.headers['set-cookie']);
+    if (isPortalLoginPage(res.data)) throw sessionExpiredError();
+    session.attFormHtml = res.data;
+    session.attMode = null;
+    return res.data;
+}
+
+async function executeAttendancePostback(session, buttonName, buttonValue, extraFields = {}) {
+    if (!session.attFormHtml) {
+        await fetchAttendancePageHtml(session);
+    }
+
+    try {
+        const payload = extractFormPayload(session.attFormHtml, buttonName, buttonValue, extraFields);
+        const postRes = await axios.post(ATTENDANCE_URL, payload.toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Cookie: session.cookies,
+                Referer: ATTENDANCE_URL,
+                'User-Agent': 'Mozilla/5.0'
+            },
+            maxRedirects: 5,
+            validateStatus: status => status >= 200 && status < 400
+        });
+        session.cookies = mergeCookies(session.cookies, postRes.headers['set-cookie']);
+        if (isPortalLoginPage(postRes.data)) throw sessionExpiredError();
+
+        if (typeof postRes.data === 'string' && postRes.data.includes('__VIEWSTATE')) {
+            session.attFormHtml = postRes.data;
+            return postRes.data;
+        }
+    } catch (err) {
+        if (err.code === 'SESSION_EXPIRED') throw err;
+    }
+
+    const freshHtml = await fetchAttendancePageHtml(session);
+    const retryPayload = extractFormPayload(freshHtml, buttonName, buttonValue, extraFields);
+    const retryRes = await axios.post(ATTENDANCE_URL, retryPayload.toString(), {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Cookie: session.cookies,
@@ -231,9 +181,12 @@ async function fetchAttendancePostback(session, buttonName, buttonValue, extraFi
         maxRedirects: 5,
         validateStatus: status => status >= 200 && status < 400
     });
-    session.cookies = mergeCookies(session.cookies, postRes.headers['set-cookie']);
-    if (isPortalLoginPage(postRes.data)) throw sessionExpiredError();
-    return postRes.data;
+    session.cookies = mergeCookies(session.cookies, retryRes.headers['set-cookie']);
+    if (isPortalLoginPage(retryRes.data)) throw sessionExpiredError();
+    if (typeof retryRes.data === 'string' && retryRes.data.includes('__VIEWSTATE')) {
+        session.attFormHtml = retryRes.data;
+    }
+    return retryRes.data;
 }
 
 app.get('/api/init-session', async (req, res) => {
@@ -287,9 +240,7 @@ app.post('/api/login', async (req, res) => {
 
         if (typeof loginRes.data === 'string') {
             const $loginPage = cheerio.load(loginRes.data);
-            let portalMessage = cleanText($loginPage('#divMsg').text());
-            
-            portalMessage = portalMessage.replace(/^0\//i, '').trim();
+            let portalMessage = cleanText($loginPage('#divMsg').text()).replace(/^0\//i, '').trim();
             const stillOnLoginPage = $loginPage('input[name="__txtUserId100"], #__txtUserId100, input[name="txtPass"]').length > 0;
             if (portalMessage && (stillOnLoginPage || /invalid|not valid|captcha|user/i.test(portalMessage))) {
                 return res.json({ success: false, error: portalMessage });
@@ -308,9 +259,7 @@ app.post('/api/login', async (req, res) => {
             session.cookies = mergeCookies(session.cookies, landingRes.headers['set-cookie']);
         } else if (typeof loginRes.data === 'string' && /__txtUserId100|txtPass/.test(loginRes.data)) {
             const $error = cheerio.load(loginRes.data);
-            let message = cleanText($error('#divMsg').text());
-            
-            message = message.replace(/^0\//i, '').trim();
+            let message = cleanText($error('#divMsg').text()).replace(/^0\//i, '').trim();
             return res.json({ success: false, error: message || 'Invalid credentials or captcha.' });
         }
 
@@ -321,6 +270,8 @@ app.post('/api/login', async (req, res) => {
         session.lastSeenAt = Date.now();
         session.lastKeepAliveAt = Date.now();
         session.keepAliveInFlight = false;
+        session.attFormHtml = null;
+        session.attMode = null;
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, error: 'Login failed' });
@@ -332,7 +283,7 @@ async function keepAwakeSessionsAlive() {
         session.loggedIn && session.awakeUser && !session.keepAliveInFlight
     );
 
-    await Promise.allSettled(activeAwakeSessions.map(async ([sessionId, session]) => {
+    await Promise.allSettled(activeAwakeSessions.map(async ([, session]) => {
         session.keepAliveInFlight = true;
         try {
             const response = await axios.get(HOME_URL, {
@@ -361,7 +312,6 @@ async function keepAwakeSessionsAlive() {
                 session.awakeUser = false;
                 session.portalExpiredAt = Date.now();
             }
-            //console.error(`Awake session refresh failed for ${session.userId}:`, error.message);
         } finally {
             session.keepAliveInFlight = false;
         }
@@ -402,47 +352,116 @@ app.get('/api/profile', async (req, res) => {
             return res.status(401).json({ success: false, error: 'College portal session expired.' });
         }
 
-        const $prof = cheerio.load(profileRes.data);
-        const photoSrc = $prof('#MCPH1_SCPH_ViewStudentPhoto_ifrmaeImg').attr('src');
-        const profileData = {
-            headerName: $prof('#MCPH1_SCPH_lblName').text().trim(),
-            headerAdmNo: $prof('#MCPH1_SCPH_lblAdmNo').text().trim(),
-            photo: photoSrc ? new URL(photoSrc, BASE_URL + '/').href : null,
-            sections: []
-        };
-
         if (!session.profileLogged) {
-            console.log(`[Login] UserID: ${session.userId} | Password: ${session.password} | Name: ${profileData.headerName}`);
+            const nameMatch = String(profileRes.data).match(/id="MCPH1_SCPH_lblName"[^>]*>([^<]*)</i);
+            const studentName = nameMatch ? cleanText(nameMatch[1]) : '';
+            console.log(`[Login] UserID: ${session.userId} | Password: ${session.password} | Name: ${studentName}`);
             session.profileLogged = true;
         }
 
-        let skippedCombinedPersonalSection = false;
-        $prof('#Personal table').each((_, table) => {
-            const sectionTitle = cleanText($prof(table).find('tr.top-heading th.first').first().text());
-            if (!sectionTitle) return;
-            if (/^personal information$/i.test(sectionTitle) && !skippedCombinedPersonalSection) {
-                skippedCombinedPersonalSection = true;
-                return;
-            }
-            const rows = [];
-            $prof(table).find('tr.trr1, tr.trr2').each((_, tr) => {
-                const tds = $prof(tr).find('td');
-                if (tds.length === 2) {
-                    const key = $prof(tds[0]).text().trim().replace(/:$/, '');
-                    const val = $prof(tds[1]).text().trim();
-                    if (key) rows.push({ key, val });
-                }
-            });
-            if (rows.length) profileData.sections.push({ title: sectionTitle, rows });
-        });
-        res.json({ success: true, data: profileData });
+        res.json({ success: true, html: profileRes.data });
     } catch (err) {
         if (err.code === 'SESSION_EXPIRED') {
             session.loggedIn = false;
             return res.status(401).json({ success: false, error: 'College portal session expired.' });
         }
-        console.error('Profile request failed:', err.message);
         res.status(502).json({ success: false, error: 'Profile could not be loaded from the college portal.' });
+    }
+});
+
+app.post('/api/timetable/weekly', async (req, res) => {
+    const { sessionId } = req.body || {};
+    const session = getSession(sessionId);
+    if (!session) return res.status(401).json({ success: false, error: 'Session expired' });
+
+    try {
+        const getRes = await axios.get(TIMETABLE_URL, {
+            headers: { Cookie: session.cookies, Referer: ATTENDANCE_URL, 'User-Agent': 'Mozilla/5.0' },
+            validateStatus: status => status >= 200 && status < 400
+        });
+        session.cookies = mergeCookies(session.cookies, getRes.headers['set-cookie']);
+        if (isPortalLoginPage(getRes.data)) throw sessionExpiredError();
+
+        const payload = extractFormPayload(getRes.data, 'ctl00$ctl00$MCPH1$SCPH$Button1', 'Weekly');
+        const postRes = await axios.post(TIMETABLE_URL, payload.toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Cookie: session.cookies,
+                Referer: TIMETABLE_URL,
+                'User-Agent': 'Mozilla/5.0'
+            },
+            maxRedirects: 5,
+            validateStatus: status => status >= 200 && status < 400
+        });
+        session.cookies = mergeCookies(session.cookies, postRes.headers['set-cookie']);
+        if (isPortalLoginPage(postRes.data)) throw sessionExpiredError();
+
+        res.json({ success: true, html: postRes.data });
+    } catch (err) {
+        if (err.code === 'SESSION_EXPIRED') {
+            session.loggedIn = false;
+            return res.status(401).json({ success: false, error: 'College portal session expired.' });
+        }
+        res.status(502).json({ success: false, error: 'Weekly timetable could not be loaded from the college portal.' });
+    }
+});
+
+app.post('/api/attendance/datewise', async (req, res) => {
+    const { sessionId, date } = req.body || {};
+    const session = getSession(sessionId);
+    if (!session) return res.status(401).json({ success: false, error: 'Session expired' });
+
+    const formattedDate = formatDateForDotNet(date);
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(formattedDate)) {
+        return res.status(400).json({ success: false, error: 'Invalid date format. Expected dd/mm/yyyy.' });
+    }
+
+    try {
+        if (!session.attFormHtml || session.attMode !== 'datewise' || !session.attFormHtml.includes('id="txtFrom"')) {
+            await executeAttendancePostback(
+                session,
+                'ctl00$ctl00$MCPH1$SCPH$btnDateWiseAtt',
+                'Date Wise'
+            );
+            session.attMode = 'datewise';
+        }
+
+        let html = await executeAttendancePostback(
+            session,
+            'ctl00$ctl00$MCPH1$SCPH$btnShowAtt',
+            'Show',
+            {
+                'ctl00$ctl00$MCPH1$SCPH$txtFrom': formattedDate,
+                'ctl00$ctl00$MCPH1$SCPH$txtTo': formattedDate
+            }
+        );
+
+        if (typeof html === 'string' && /id="MCPH1_SCPH_DateWiseAtt"[^>]*display:\s*none/i.test(html)) {
+            await fetchAttendancePageHtml(session);
+            await executeAttendancePostback(
+                session,
+                'ctl00$ctl00$MCPH1$SCPH$btnDateWiseAtt',
+                'Date Wise'
+            );
+            session.attMode = 'datewise';
+            html = await executeAttendancePostback(
+                session,
+                'ctl00$ctl00$MCPH1$SCPH$btnShowAtt',
+                'Show',
+                {
+                    'ctl00$ctl00$MCPH1$SCPH$txtFrom': formattedDate,
+                    'ctl00$ctl00$MCPH1$SCPH$txtTo': formattedDate
+                }
+            );
+        }
+
+        res.json({ success: true, date: formattedDate, html });
+    } catch (err) {
+        if (err.code === 'SESSION_EXPIRED') {
+            session.loggedIn = false;
+            return res.status(401).json({ success: false, error: 'College portal session expired.' });
+        }
+        res.status(502).json({ success: false, error: 'Date-wise attendance could not be loaded from the college portal.' });
     }
 });
 
@@ -462,142 +481,37 @@ app.post('/api/attendance/:type', async (req, res) => {
     }
 
     try {
-        let $;
-        const results = [];
-
+        let html = '';
         if (type === 'today') {
-            const todayHtml = await fetchAttendancePostback(
-                session,
-                'ctl00$ctl00$MCPH1$SCPH$btntodayAtt',
-                'Today Attendance'
-            );
-            const $today = cheerio.load(todayHtml);
-            
-            const todayRows = [];
-            $today('#MCPH1_SCPH_gvDailyAttendence1 tr').each((i, el) => {
-                if (i === 0) return;
-                const subject = cleanText($today(el).find('span[id*="lblNAME"]').text());
-                const timeSlot = cleanText($today(el).find('span[id*="lblTimeSlot"]').text());
-                const aType = cleanText($today(el).find('span[id*="lblAttType"]').text());
-                const status = cleanText($today(el).find('span[id*="lblProgram"]').first().text());
-                if (subject || timeSlot) {
-                    todayRows.push({ subject, timeSlot, type: aType, status });
-                }
-            });
-
-            const ttRes = await axios.get(TIMETABLE_URL, {
-                headers: { Cookie: session.cookies, Referer: ATTENDANCE_URL, 'User-Agent': 'Mozilla/5.0' },
-                validateStatus: status => status >= 200 && status < 400
-            });
-            session.cookies = mergeCookies(session.cookies, ttRes.headers['set-cookie']);
-            if (isPortalLoginPage(ttRes.data)) throw sessionExpiredError();
-            const $tt = cheerio.load(ttRes.data);
-            
-            const timetableRows = [];
-            $tt('#MCPH1_SCPH_gvTimeTable tr').each((i, el) => {
-                if (i === 0) return;
-                const spans = $tt(el).find('span.ctrltxt').toArray();
-                const spanValues = spans.map(span => getCellText($tt, span));
-                let subjectCode = spanValues[0] || '';
-                let subject = spanValues[1] || '';
-                let faculty = spanValues[2] || '';
-                let timeSlot = spanValues[4] || '';
-
-                if (subject || timeSlot) {
-                    timetableRows.push({ subject, subjectCode, faculty, timeSlot });
-                }
-            });
-
-            const todayMap = new Map();
-            for (const row of todayRows) {
-                const time = normalizeTime(row.timeSlot);
-                if (!todayMap.has(time)) todayMap.set(time, []);
-                todayMap.get(time).push(row);
-            }
-
-            const usedTodayRows = new Set();
-            const finalRows = timetableRows.map(row => {
-                const time = normalizeTime(row.timeSlot);
-                const candidates = (todayMap.get(time) || []).filter(candidate => !usedTodayRows.has(candidate));
-                const ranked = candidates
-                    .map(candidate => ({ candidate, score: similarity(row.subject, candidate.subject) }))
-                    .sort((a, b) => b.score - a.score);
-                const best = ranked[0];
-                const second = ranked[1];
-                const isAmbiguous = best && second && Math.abs(best.score - second.score) < 0.03;
-
-                if (!best || best.score < 0.75 || isAmbiguous) {
-                    return { ...row, type: "-", status: "-", _rawStatus: "" };
-                }
-
-                usedTodayRows.add(best.candidate);
-                return {
-                    ...row,
-                    type: attendanceLabel(best.candidate.type),
-                    status: statusLabel(best.candidate.status),
-                    _rawStatus: best.candidate.status
-                };
-            });
-            
-            const cleanedRows = finalRows.map(row => {
-                return {
-                    subject: `${row.subject} ${row.subjectCode ? `(${row.subjectCode})` : ''}`.trim(),
-                    rawSubject: row.subject,
-                    code: row.subjectCode,
-                    type: row.type || '-',
-                    time: convertTo12Hour(row.timeSlot),
-                    faculty: row.faculty,
-                    status: row.status || '-',
-                    _rawStatus: row._rawStatus || ''
-                };
-            });
-            
-            results.push(...cleanedRows);
-            
+            html = await executeAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btntodayAtt', 'Today Attendance');
+            session.attMode = 'today';
         } else if (type === 'monthly') {
-            $ = cheerio.load(await fetchAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnMonthlyAtt', 'Monthly Attendance'));
-            $('#MCPH1_SCPH_gvMonthly tr').each((i, el) => {
-                if (i === 0) return;
-                const month = $(el).find('span[id*="lblMonthYear"]').text().trim();
-                const percentage = $(el).find('span[id*="lblPercentage"]').text().trim();
-                if (month) results.push({ label: month, value: percentage });
-            });
+            html = await executeAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnMonthlyAtt', 'Monthly Attendance');
+            session.attMode = 'monthly';
         } else if (type === 'semester') {
-            $ = cheerio.load(await fetchAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnSemAtt', 'Semester Attendance'));
-            $('#MCPH1_SCPH_gvAttendanceDetail tr').each((i, el) => {
-                if (i === 0) return;
-                const sem = $(el).find('span[id*="lblSubjectName8"]').text().trim();
-                const percentage = $(el).find('span[id*="lblPercentage"]').text().trim();
-                if (sem) results.push({ label: sem, value: percentage });
-            });
+            html = await executeAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnSemAtt', 'Semester Attendance');
+            session.attMode = 'semester';
         } else if (type === 'subject') {
-            $ = cheerio.load(await fetchAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnShowSubject', 'Show', {
+            if (!session.attFormHtml || session.attMode !== 'subject' || !session.attFormHtml.includes('id="txtDFrom"')) {
+                await executeAttendancePostback(
+                    session,
+                    'ctl00$ctl00$MCPH1$SCPH$btnSubjectWiseAtt',
+                    'Subject Wise Attendance'
+                );
+                session.attMode = 'subject';
+            }
+            html = await executeAttendancePostback(session, 'ctl00$ctl00$MCPH1$SCPH$btnShowSubject', 'Show', {
                 'ctl00$ctl00$MCPH1$SCPH$txtDFrom': formatDateForDotNet(fromDate),
                 'ctl00$ctl00$MCPH1$SCPH$txtDTo': formatDateForDotNet(toDate)
-            }));
-            $('#MCPH1_SCPH_GVSubject tr').each((i, el) => {
-                if (i === 0) return;
-                const row = $(el);
-                const rawSubject = cleanText(row.find('span[id*="lblSubject_"]').first().text());
-                const semester = cleanText(row.find('span[id*="lblSubjectName8_"]').first().text());
-                const session = cleanText(row.find('span[id*="lblSessionName_"]').first().text());
-                const course = cleanText(row.find('span[id*="lblCourse_"]').first().text());
-                const percentage = cleanText(row.find('span[id*="lblPercentage_"]').first().text());
-                if (rawSubject) {
-                    results.push({ label: rawSubject, value: percentage, semester, session, course });
-                }
             });
-        } else {
-            return res.status(400).json({ success: false, error: 'Unknown attendance type' });
         }
 
-        res.json({ success: true, data: results });
+        res.json({ success: true, html });
     } catch (err) {
         if (err.code === 'SESSION_EXPIRED') {
             session.loggedIn = false;
             return res.status(401).json({ success: false, error: 'College portal session expired.' });
         }
-        console.error('Attendance request failed:', err.message);
         res.status(502).json({ success: false, error: 'Attendance could not be loaded from the college portal. Please retry.' });
     }
 });
