@@ -361,7 +361,7 @@ async function keepAwakeSessionsAlive() {
                 session.awakeUser = false;
                 session.portalExpiredAt = Date.now();
             }
-            console.error(`Awake session refresh failed for ${session.userId}:`, error.message);
+            //console.error(`Awake session refresh failed for ${session.userId}:`, error.message);
         } finally {
             session.keepAliveInFlight = false;
         }
