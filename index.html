@@ -446,7 +446,7 @@
                     <div class="profile-header">
                         <div class="profile-avatar-wrapper" id="profAvatarWrapper" onclick="openProfileLightbox()">
                             <svg id="profDefaultSvg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            <img id="profImg" class="hidden" src="" alt="Profile" onerror="window.handleImageError(this)">
+                            <img id="profImg" class="hidden" alt="Profile" onerror="if(window.handleImageError)window.handleImageError(this)">
                         </div>
                         <div>
                             <h2 id="profName">Student Profile</h2>
@@ -1261,6 +1261,7 @@
             }
 
             const formattedDate = formatIsoToDdMmYyyy(isoDateStr);
+            const isToday = isoDateStr === getTodayIsoDate();
 
             const res = await fetchWithRetry(`${API_BASE}/attendance/datewise`, {
                 method: 'POST',
@@ -1289,9 +1290,13 @@
                 throw new Error(parsed.error);
             }
 
-            if (parsed.status === 'FOUND') {
+            if (parsed.status === 'FOUND' || (isToday && !isSundayIso(isoDateStr))) {
                 const timetable = await ensureWeeklyTimetableLoaded();
-                parsed.records = mergeAttendanceWithTimetable(parsed.records, timetable, isoDateStr);
+                const merged = mergeAttendanceWithTimetable(parsed.records, timetable, isoDateStr);
+                if (merged.length > 0) {
+                    parsed.status = 'FOUND';
+                    parsed.records = merged;
+                }
             }
 
             dateAttendanceCache.set(isoDateStr, parsed);
