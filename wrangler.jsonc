@@ -2,11 +2,19 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "isim-lite",
   "main": "src/worker.js",
-  "compatibility_date": "2024-11-01",
+  "compatibility_date": "2025-02-04",
+  "observability": {
+    "enabled": true
+  },
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./www",
     "binding": "ASSETS"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "bfed108f9f404325b2a95e42843b3498"
+    }
+  ]
 }
-

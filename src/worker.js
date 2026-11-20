@@ -109,9 +109,10 @@ async function getSession(sessionId, env, requireLogin = true) {
     if (!sessionId) return null;
     let session = memorySessions.get(sessionId);
     
-    if (!session && env.SESSIONS) {
+    const kv = env.KV || env.SESSIONS;
+    if (!session && kv) {
         try {
-            const raw = await env.SESSIONS.get(sessionId);
+            const raw = await kv.get(sessionId);
             if (raw) session = JSON.parse(raw);
         } catch (_) {}
     }
@@ -123,9 +124,10 @@ async function getSession(sessionId, env, requireLogin = true) {
 
 async function saveSession(sessionId, session, env) {
     memorySessions.set(sessionId, session);
-    if (env.SESSIONS) {
+    const kv = env.KV || env.SESSIONS;
+    if (kv) {
         try {
-            await env.SESSIONS.put(sessionId, JSON.stringify(session), { expirationTtl: 3600 * 12 });
+            await kv.put(sessionId, JSON.stringify(session), { expirationTtl: 3600 * 12 });
         } catch (_) {}
     }
 }
@@ -340,7 +342,8 @@ export default {
                 const { sessionId } = await request.json() || {};
                 if (sessionId) {
                     memorySessions.delete(sessionId);
-                    if (env.SESSIONS) await env.SESSIONS.delete(sessionId);
+                    const kv = env.KV || env.SESSIONS;
+                    if (kv) await kv.delete(sessionId);
                 }
             } catch (_) {}
             return makeCorsResponse({ success: true });
