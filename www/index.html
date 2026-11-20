@@ -719,7 +719,7 @@ body.dark-mode .class-note-badge { background: #422006; border-color: #713f12; c
                                 <span id="serverConnectionStatus" style="font-size:12px; font-weight:700; color:var(--primary);">Connected ✅</span>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                <input type="text" id="workerUrlInput" placeholder="Auto-detected (e.g. https://isim-lite.workers.dev)" style="flex:1; padding:10px 14px; border:2px solid #e2e8f0; border-radius:10px; font-family:'Outfit'; font-size:13.5px; background:var(--card-bg); color:var(--text-dark);">
+                                <input type="text" id="workerUrlInput" placeholder="https://isim-lite.divyanshugupta415.workers.dev" style="flex:1; padding:10px 14px; border:2px solid #e2e8f0; border-radius:10px; font-family:'Outfit'; font-size:13.5px; background:var(--card-bg); color:var(--text-dark);">
                                 <button type="button" class="btn-small" onclick="saveWorkerUrlFromInput()">Save</button>
                                 <button type="button" class="btn-note" onclick="testServerConnection(true)">Test</button>
                             </div>
@@ -909,7 +909,7 @@ body.dark-mode .class-note-badge { background: #422006; border-color: #713f12; c
                 }
             }
             // Default worker fallback for Android Capacitor
-            return 'https://isim-lite.workers.dev/api';
+            return 'https://isim-lite.divyanshugupta415.workers.dev/api';
         }
         let API_BASE = resolveApiBase();
         const BASE_PORTAL_URL = 'https://glb.servergi.com:8071/iSIMGLBMTR';
@@ -1813,7 +1813,10 @@ body.dark-mode .class-note-badge { background: #422006; border-color: #713f12; c
         function initWorkerUrlUI() {
             const input = document.getElementById('workerUrlInput');
             if (input) {
-                input.value = localStorage.getItem(WORKER_URL_KEY) || (window.location.protocol.startsWith('http') ? window.location.origin : '');
+                input.value = localStorage.getItem(WORKER_URL_KEY) || 
+                    ((window.location.protocol.startsWith('http') && !window.location.origin.startsWith('capacitor:') && !window.location.origin.includes('github.io'))
+                        ? window.location.origin 
+                        : 'https://isim-lite.divyanshugupta415.workers.dev');
             }
             testServerConnection(false);
         }

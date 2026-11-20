@@ -13,7 +13,7 @@
                 }
             }
             // Default worker fallback for Android Capacitor
-            return 'https://isim-lite.workers.dev/api';
+            return 'https://isim-lite.divyanshugupta415.workers.dev/api';
         }
         let API_BASE = resolveApiBase();
         const BASE_PORTAL_URL = 'https://glb.servergi.com:8071/iSIMGLBMTR';
@@ -917,7 +917,10 @@
         function initWorkerUrlUI() {
             const input = document.getElementById('workerUrlInput');
             if (input) {
-                input.value = localStorage.getItem(WORKER_URL_KEY) || (window.location.protocol.startsWith('http') ? window.location.origin : '');
+                input.value = localStorage.getItem(WORKER_URL_KEY) || 
+                    ((window.location.protocol.startsWith('http') && !window.location.origin.startsWith('capacitor:') && !window.location.origin.includes('github.io'))
+                        ? window.location.origin 
+                        : 'https://isim-lite.divyanshugupta415.workers.dev');
             }
             testServerConnection(false);
         }
