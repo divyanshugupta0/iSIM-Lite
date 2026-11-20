@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "node copy-assets.js",
+    "build": "node assemble.js",
+    "bundle": "node assemble.js && npx cap sync android",
     "worker:dev": "npx wrangler dev",
     "worker:deploy": "node assemble.js && npx wrangler deploy",
     "cap:copy": "node copy-assets.js && npx cap copy android",
