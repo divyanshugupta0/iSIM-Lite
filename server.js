@@ -3,6 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
+const path = require('path');
 
 const app = express();
 const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean);
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '32kb' }));
 app.disable('x-powered-by');
+app.use(express.static(__dirname));
 
 axios.defaults.timeout = 15000;
 axios.defaults.maxContentLength = 8 * 1024 * 1024;
@@ -455,6 +457,10 @@ app.post('/api/attendance/datewise', async (req, res) => {
             );
         }
 
+        if (session && session.userId) {
+            checkAndSendAttendanceAlert(session.userId, html).catch(() => {});
+        }
+
         res.json({ success: true, date: formattedDate, html });
     } catch (err) {
         if (err.code === 'SESSION_EXPIRED') {
@@ -506,6 +512,10 @@ app.post('/api/attendance/:type', async (req, res) => {
             });
         }
 
+        if (session && session.userId && type === 'today') {
+            checkAndSendAttendanceAlert(session.userId, html).catch(() => {});
+        }
+
         res.json({ success: true, html });
     } catch (err) {
         if (err.code === 'SESSION_EXPIRED') {
@@ -513,6 +523,76 @@ app.post('/api/attendance/:type', async (req, res) => {
             return res.status(401).json({ success: false, error: 'College portal session expired.' });
         }
         res.status(502).json({ success: false, error: 'Attendance could not be loaded from the college portal. Please retry.' });
+    }
+});
+
+const webpush = require('web-push');
+
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BOrP0npFRyqTzIa6E9PdNEJyn4YTT2dWarME4AT61Qv1Rvb7Z7H0QmKBlzTpcydwHI4OLqGxztBSGela9lnT6gM';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '40k1y1KeUs4AqMmbVL9SeFeIbhS8jl_tVl5tjm_GfCM';
+
+webpush.setVapidDetails(
+    'mailto:support@isimlite.edu',
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+);
+
+const pushSubscriptions = new Map();
+
+async function checkAndSendAttendanceAlert(userId, html) {
+    const subData = pushSubscriptions.get(userId);
+    if (!subData || !subData.subscription) return;
+    
+    // Look for absent records
+    if (typeof html === 'string' && /lblProgram[^>]*>\s*A\s*<|lblStatus[^>]*>\s*A\s*<|class=["'][^"']*badge-absent[^"']*["']/i.test(html)) {
+        const payload = JSON.stringify({
+            title: '⚠️ Attendance Alert: Marked ABSENT!',
+            body: 'You have been marked Absent in one of today\'s lectures. Open iSIM-Lite to check!',
+            icon: 'https://www.glbitm.org/images/favicon.png',
+            tag: `absent-${Date.now()}`
+        });
+        try {
+            await webpush.sendNotification(subData.subscription, payload);
+        } catch (_) {}
+    }
+}
+
+app.get('/api/push/vapid-public-key', (req, res) => {
+    res.json({ success: true, publicKey: VAPID_PUBLIC_KEY });
+});
+
+app.post('/api/push/subscribe', (req, res) => {
+    const { sessionId, subscription, preferences } = req.body || {};
+    const session = getSession(sessionId, false);
+    const userId = session ? session.userId : (req.body.userId || 'STUDENT');
+    if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ success: false, error: 'Invalid subscription' });
+    }
+    pushSubscriptions.set(userId, { subscription, preferences: preferences || {}, updatedAt: Date.now() });
+    res.json({ success: true, message: 'Push subscription registered successfully' });
+});
+
+app.post('/api/push/test', async (req, res) => {
+    const { sessionId, subscription } = req.body || {};
+    const session = getSession(sessionId, false);
+    const targetSub = subscription || (session && pushSubscriptions.get(session.userId)?.subscription);
+    
+    if (!targetSub) {
+        return res.status(400).json({ success: false, error: 'No active push subscription found. Enable notifications first.' });
+    }
+
+    const payload = JSON.stringify({
+        title: '⚠️ Attendance Alert: Marked ABSENT!',
+        body: 'Alert: You were marked Absent in Database Management Systems (09:10 - 10:00 AM). Check your attendance!',
+        icon: 'https://www.glbitm.org/images/favicon.png',
+        tag: 'attendance-alert'
+    });
+
+    try {
+        await webpush.sendNotification(targetSub, payload);
+        res.json({ success: true, message: 'Test push notification delivered!' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Push delivery failed: ' + err.message });
     }
 });
 

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">iSIM Lite</string>
+    <string name="title_activity_main">iSIM Lite</string>
+    <string name="package_name">com.glbitm.isimlite</string>
+    <string name="custom_url_scheme">com.glbitm.isimlite</string>
+</resources>
